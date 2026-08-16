@@ -23,7 +23,21 @@ app.use(helmet());
 const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
 app.use(
   cors({
-    origin: [clientUrl, 'http://localhost:5173'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like Postman or server-to-server)
+      if (!origin) return callback(null, true);
+      // Allow configured clientUrl, localhost, or any onrender.com subdomains
+      if (
+        origin === clientUrl ||
+        origin === clientUrl.replace(/\/$/, '') ||
+        origin.includes('localhost') ||
+        origin.endsWith('.onrender.com') ||
+        origin.endsWith('.vercel.app')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true
   })
 );
@@ -39,7 +53,15 @@ const authLimiter = rateLimit({
   message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' }
 });
 
-// Health check
+// Root & Health check
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'MerboloEbook API Server is running',
+    health: '/api/health'
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
