@@ -12,6 +12,8 @@ import orderRoutes from './routes/orderRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
+import { runSeed } from './seed/seedData.js';
+
 dotenv.config();
 
 const app = express();
@@ -68,6 +70,20 @@ app.get('/api/health', (req, res) => {
     message: 'MerboloEbook API is healthy',
     timestamp: new Date().toISOString()
   });
+});
+
+// One-click Database Seeder endpoint
+app.get('/api/seed', async (req, res, next) => {
+  try {
+    const result = await runSeed();
+    res.status(200).json({
+      success: true,
+      message: 'Database seeded successfully!',
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // API Routes

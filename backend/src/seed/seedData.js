@@ -333,76 +333,80 @@ const sampleProducts = (catMap) => [
   }
 ];
 
+export const runSeed = async () => {
+  console.log('Clearing existing database collections...');
+  await Category.deleteMany({});
+  await Product.deleteMany({});
+  await User.deleteMany({});
+
+  console.log('Seeding Users...');
+  const adminPasswordHash = await bcrypt.hash('Admin123456!', 10);
+  const customerPasswordHash = await bcrypt.hash('Customer123456!', 10);
+
+  const adminUser = await User.create({
+    name: 'Admin Merbolo',
+    email: 'admin@merbolo.com',
+    passwordHash: adminPasswordHash,
+    role: 'admin',
+    addresses: [
+      {
+        label: 'Shop Headquarters',
+        line1: '88 Sukhumvit Road',
+        line2: 'Floor 12',
+        city: 'Bangkok',
+        province: 'Bangkok',
+        postalCode: '10110',
+        country: 'TH',
+        isDefault: true
+      }
+    ]
+  });
+
+  const customerUser = await User.create({
+    name: 'John Doe',
+    email: 'john@example.com',
+    passwordHash: customerPasswordHash,
+    role: 'customer',
+    addresses: [
+      {
+        label: 'Home',
+        line1: '123 Rama IV Road',
+        line2: 'Apt 4B',
+        city: 'Bangkok',
+        province: 'Bangkok',
+        postalCode: '10330',
+        country: 'TH',
+        isDefault: true
+      }
+    ]
+  });
+
+  console.log('Seeding Categories...');
+  const createdCategories = await Category.insertMany(categories);
+
+  const catMap = {};
+  createdCategories.forEach((cat) => {
+    catMap[cat.slug] = cat._id;
+  });
+
+  console.log('Seeding Products...');
+  const productsData = sampleProducts(catMap);
+  const createdProducts = await Product.insertMany(productsData);
+
+  return {
+    categoriesCount: createdCategories.length,
+    productsCount: createdProducts.length,
+    adminEmail: adminUser.email,
+    customerEmail: customerUser.email
+  };
+};
+
 export const seedDatabase = async () => {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/merboloebook';
     console.log(`Connecting to Mongo at ${mongoUri}...`);
     await mongoose.connect(mongoUri);
-
-    console.log('Clearing existing database collections...');
-    await Category.deleteMany({});
-    await Product.deleteMany({});
-    await User.deleteMany({});
-
-    console.log('Seeding Users...');
-    const adminPasswordHash = await bcrypt.hash('Admin123456!', 10);
-    const customerPasswordHash = await bcrypt.hash('Customer123456!', 10);
-
-    const adminUser = await User.create({
-      name: 'Admin Merbolo',
-      email: 'admin@merbolo.com',
-      passwordHash: adminPasswordHash,
-      role: 'admin',
-      addresses: [
-        {
-          label: 'Shop Headquarters',
-          line1: '88 Sukhumvit Road',
-          line2: 'Floor 12',
-          city: 'Bangkok',
-          province: 'Bangkok',
-          postalCode: '10110',
-          country: 'TH',
-          isDefault: true
-        }
-      ]
-    });
-
-    const customerUser = await User.create({
-      name: 'John Doe',
-      email: 'john@example.com',
-      passwordHash: customerPasswordHash,
-      role: 'customer',
-      addresses: [
-        {
-          label: 'Home',
-          line1: '123 Rama IV Road',
-          line2: 'Apt 4B',
-          city: 'Bangkok',
-          province: 'Bangkok',
-          postalCode: '10330',
-          country: 'TH',
-          isDefault: true
-        }
-      ]
-    });
-
-    console.log(`Created Admin: ${adminUser.email} (Password: Admin123456!)`);
-    console.log(`Created Customer: ${customerUser.email} (Password: Customer123456!)`);
-
-    console.log('Seeding Categories...');
-    const createdCategories = await Category.insertMany(categories);
-    console.log(`Created ${createdCategories.length} categories.`);
-
-    const catMap = {};
-    createdCategories.forEach((cat) => {
-      catMap[cat.slug] = cat._id;
-    });
-
-    console.log('Seeding Products...');
-    const productsData = sampleProducts(catMap);
-    const createdProducts = await Product.insertMany(productsData);
-    console.log(`Created ${createdProducts.length} products.`);
-
+    await runSeed();
     console.log('Seed database completed successfully!');
     process.exit(0);
   } catch (error) {
