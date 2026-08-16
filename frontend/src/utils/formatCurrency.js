@@ -1,10 +1,8 @@
 export const formatCurrency = (amount) => {
   if (amount === undefined || amount === null || isNaN(amount)) {
-    return '฿0';
+    return 'K 0';
   }
-  return new Intl.NumberFormat('th-TH', {
-    style: 'currency',
-    currency: 'THB',
+  return 'K ' + new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0
   }).format(amount);
 };

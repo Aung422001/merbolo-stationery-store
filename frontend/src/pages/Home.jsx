@@ -94,7 +94,7 @@ export const Home = () => {
             </div>
             <div>
               <h4 className="font-bold text-slate-900 text-sm">Free Express Delivery</h4>
-              <p className="text-xs text-slate-500 mt-0.5">Complimentary shipping on orders over ฿1,000 across Thailand.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Complimentary shipping on orders over K 1,000 across Myanmar.</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
