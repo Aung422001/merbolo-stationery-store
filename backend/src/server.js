@@ -6,12 +6,8 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
-// Connect Database and Start Server
-const startServer = async () => {
-  await connectDB();
-  app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  });
-};
-
-startServer();
+// Start HTTP Server immediately so Render port binding succeeds
+app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  connectDB();
+});
