@@ -1,7 +1,22 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && envUrl !== 'undefined' && !envUrl.includes('localhost')) {
+    return envUrl;
+  }
+
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.onrender.com')) {
+    // If frontend is merbolo-stationery-store-1.onrender.com, backend is merbolo-stationery-store.onrender.com
+    const backendHost = window.location.hostname.replace(/-\d+\.onrender\.com$/, '.onrender.com');
+    return `https://${backendHost}/api`;
+  }
+
+  return envUrl || 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
 
 const client = axios.create({
   baseURL: API_URL,
