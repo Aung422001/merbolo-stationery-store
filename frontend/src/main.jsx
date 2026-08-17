@@ -23,7 +23,7 @@ class ErrorBoundary extends React.Component {
       localStorage.removeItem('merbolo_guest_cart');
     } catch (e) {}
     this.setState({ hasError: false });
-    window.location.href = '/shop';
+    window.location.href = '/';
   };
 
   render() {
