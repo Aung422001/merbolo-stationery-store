@@ -7,9 +7,12 @@ import { CartSummary } from '../components/cart/CartSummary';
 import { EmptyState } from '../components/ui/EmptyState';
 
 export const Cart = () => {
-  const { items, clearCart } = useCartStore();
+  const items = useCartStore((state) => state.items) || [];
+  const clearCart = useCartStore((state) => state.clearCart);
 
-  if (items.length === 0) {
+  const validItems = items.filter((item) => item && (item.product || item.productId));
+
+  if (validItems.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <EmptyState
@@ -45,8 +48,8 @@ export const Cart = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items List */}
         <div className="lg:col-span-2 space-y-3">
-          {items.map((item) => (
-            <CartItem key={item.productId || item.product?._id} item={item} />
+          {validItems.map((item, idx) => (
+            <CartItem key={item.productId || item.product?._id || `cart_item_${idx}`} item={item} />
           ))}
         </div>
 

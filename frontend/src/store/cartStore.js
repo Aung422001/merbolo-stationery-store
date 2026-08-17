@@ -30,9 +30,12 @@ export const useCartStore = create((set, get) => ({
   },
 
   getSubtotal: () => {
-    return get().items.reduce((sum, item) => {
-      const price = item.product?.price ?? item.price ?? 0;
-      return sum + price * item.quantity;
+    return (get().items || []).reduce((sum, item) => {
+      if (!item) return sum;
+      const isObj = typeof item.product === 'object' && item.product !== null;
+      const price = isObj ? (item.product.price ?? item.price ?? 0) : (item.price ?? 0);
+      const qty = item.quantity || 1;
+      return sum + price * qty;
     }, 0);
   },
 
@@ -43,12 +46,18 @@ export const useCartStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await getCartApi();
-      const serverItems = (response.data?.items || []).map((i) => ({
-        productId: i.product._id || i.product,
-        product: i.product,
-        quantity: i.quantity,
-        price: i.product?.price || i.priceAtAdd
-      }));
+      const serverItems = (response.data?.items || [])
+        .filter((i) => i && i.product)
+        .map((i) => {
+          const isObj = typeof i.product === 'object' && i.product !== null;
+          const pId = isObj ? i.product._id : i.product;
+          return {
+            productId: pId,
+            product: isObj ? i.product : null,
+            quantity: i.quantity || 1,
+            price: isObj ? (i.product.price ?? i.priceAtAdd) : (i.priceAtAdd || 0)
+          };
+        });
       set({ items: serverItems, isLoading: false });
     } catch (error) {
       console.error('Failed to fetch user cart:', error);
