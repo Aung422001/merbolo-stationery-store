@@ -7,8 +7,19 @@ const GUEST_CART_KEY = 'merbolo_guest_cart';
 const loadGuestCart = () => {
   try {
     const data = localStorage.getItem(GUEST_CART_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) {
+      localStorage.removeItem(GUEST_CART_KEY);
+      return [];
+    }
+    return parsed.filter((item) => {
+      if (!item || typeof item !== 'object') return false;
+      const hasProduct = item.product || item.productId;
+      return Boolean(hasProduct);
+    });
   } catch (err) {
+    localStorage.removeItem(GUEST_CART_KEY);
     return [];
   }
 };
