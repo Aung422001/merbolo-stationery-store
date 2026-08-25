@@ -31,24 +31,29 @@ export const Home = () => {
   return (
     <div className="space-y-16 pb-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-100 via-brand-50 to-white py-16 sm:py-24 border-b border-brand-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-50 via-orange-50 to-amber-50 py-16 sm:py-24 border-b border-brand-200">
+        {/* Decorative background blobs */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-brand-200/40 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-brand-300/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-200/60 border border-brand-300 text-brand-900 text-xs font-semibold uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 text-brand-700" />
+              <div className="animate-fade-in-up inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-700/10 border border-brand-600/30 text-brand-800 text-xs font-semibold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5 text-brand-600 animate-pulse-soft" />
                 Crafted for Stationery Lovers
               </div>
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight font-serif">
-                Write, Plan & Dream with Beautiful Tools
+              <h1 className="animate-fade-in-up delay-100 text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight font-serif">
+                <span className="gradient-text">Write, Plan &amp; Dream</span>
+                <br />
+                <span className="text-slate-900">with Beautiful Tools</span>
               </h1>
-              <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
+              <p className="animate-fade-in-up delay-200 text-base sm:text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
                 Discover curated Japanese notebooks, fountain pens, aesthetic washi tapes, and premium bullet journaling supplies.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2">
+              <div className="animate-fade-in-up delay-300 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2">
                 <Link
                   to="/shop"
-                  className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-md hover:shadow-lg transition-all gap-2"
+                  className="btn-glow inline-flex items-center justify-center px-7 py-4 text-base font-bold text-white bg-gradient-to-r from-brand-700 to-brand-500 hover:from-brand-800 hover:to-brand-600 rounded-xl shadow-lg hover:shadow-xl transition-all gap-2 hover:-translate-y-0.5"
                 >
                   Explore Shop
                   <ArrowRight className="w-5 h-5" />
@@ -57,17 +62,17 @@ export const Home = () => {
               </div>
             </div>
 
-            {/* Hero Image Collage */}
-            <div className="relative flex justify-center">
-              <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white transform rotate-1 hover:rotate-0 transition-transform duration-500">
+            {/* Hero Image */}
+            <div className="relative flex justify-center animate-scale-in delay-200">
+              <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white animate-float hover:rotate-0 transition-transform duration-500">
                 <img
                   src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80"
                   alt="Stationery Journal & Pen"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="absolute -bottom-6 -left-6 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-brand-100 shadow-xl hidden sm:flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+              <div className="absolute -bottom-6 -left-6 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-brand-200 shadow-xl hidden sm:flex items-center gap-3 animate-fade-in-up delay-400">
+                <div className="w-10 h-10 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold">
                   <PenTool className="w-5 h-5" />
                 </div>
                 <div>
