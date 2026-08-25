@@ -6,10 +6,15 @@ import { useCartStore } from '../../store/cartStore';
 import { Button } from '../ui/Button';
 
 export const CartSummary = ({ checkoutButton = true }) => {
-  const getSubtotal = useCartStore((state) => state.getSubtotal());
-  const itemCount = useCartStore((state) => state.getItemCount());
+  const items = useCartStore((state) => state.items) || [];
 
-  const subtotal = getSubtotal();
+  const itemCount = items.reduce((sum, item) => sum + (item?.quantity || 0), 0);
+  const subtotal = items.reduce((sum, item) => {
+    if (!item) return sum;
+    const isObj = typeof item.product === 'object' && item.product !== null;
+    const price = isObj ? (item.product?.price ?? item.price ?? 0) : (item.price ?? 0);
+    return sum + price * (item.quantity || 1);
+  }, 0);
   const shippingFee = subtotal > 1000 || subtotal === 0 ? 0 : 50;
   const total = subtotal + shippingFee;
 
