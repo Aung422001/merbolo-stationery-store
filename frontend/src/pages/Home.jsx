@@ -77,49 +77,79 @@ export const Home = () => {
               </div>
             </div>
 
-            {/* Hero Image Slider */}
-            <div className="relative flex justify-center animate-scale-in delay-200">
-              <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white animate-float-hero">
-                <div
-                  className="flex h-full transition-transform duration-700 ease-in-out"
-                  style={{ transform: `translateX(-${currentSlide * 100}%)`, width: `${HERO_IMAGES.length * 100}%` }}
-                >
-                  {HERO_IMAGES.map((src, index) => (
-                    <div key={index} className="w-full h-full shrink-0">
+            {/* 3D Carousel Image Slider */}
+            <div className="relative w-full max-w-lg aspect-[4/3] flex items-center justify-center animate-scale-in delay-200">
+              <div className="relative w-full h-full flex items-center justify-center overflow-visible">
+                {HERO_IMAGES.map((src, index) => {
+                  let position = "inactive";
+                  let offset = index - currentSlide;
+                  
+                  // Wrap index difference around array length
+                  if (offset < -1) offset += HERO_IMAGES.length;
+                  if (offset > 1) offset -= HERO_IMAGES.length;
+                  
+                  // Adjust wrapping logic for edge cases where the difference is exactly half
+                  if (offset === 0) {
+                    position = "active";
+                  } else if (offset === -1 || (offset === HERO_IMAGES.length - 1)) {
+                    position = "prev";
+                  } else if (offset === 1 || (offset === -1 * (HERO_IMAGES.length - 1))) {
+                    position = "next";
+                  }
+
+                  const getPositionClasses = () => {
+                    switch (position) {
+                      case "active":
+                        return "z-20 translate-x-0 scale-100 opacity-100 shadow-2xl border-4 border-white cursor-pointer";
+                      case "prev":
+                        return "z-10 -translate-x-16 sm:-translate-x-24 scale-75 opacity-40 pointer-events-none shadow-lg border-2 border-white/80";
+                      case "next":
+                        return "z-10 translate-x-16 sm:translate-x-24 scale-75 opacity-40 pointer-events-none shadow-lg border-2 border-white/80";
+                      default:
+                        return "opacity-0 scale-50 pointer-events-none z-0";
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => position === "active" && setCurrentSlide((index + 1) % HERO_IMAGES.length)}
+                      className={`absolute w-[60%] sm:w-[65%] aspect-square rounded-3xl overflow-hidden transition-all duration-500 ease-out transform ${getPositionClasses()}`}
+                    >
                       <img
                         src={src}
-                        alt={`Featured Stationery ${index + 1}`}
+                        alt={`Stationery slide ${index + 1}`}
                         className="w-full h-full object-cover select-none"
                         draggable="false"
                       />
                     </div>
-                  ))}
-                </div>
-
-                {/* Dot Indicators */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 bg-slate-900/35 backdrop-blur-sm px-2.5 py-1.5 rounded-full">
-                  {HERO_IMAGES.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentSlide(index)}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                        currentSlide === index ? 'bg-white w-4' : 'bg-white/60 hover:bg-white'
-                      }`}
-                      aria-label={`Go to slide ${index + 1}`}
-                    />
-                  ))}
-                </div>
+                  );
+                })}
               </div>
 
-              {/* MD Paper Floating badge */}
-              <div className="absolute -bottom-6 -left-6 bg-white/80 backdrop-blur-lg p-5 rounded-2xl border border-brand-200/60 shadow-xl hidden sm:flex items-center gap-3 animate-float-badge delay-400">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-300 to-brand-100 text-brand-700 flex items-center justify-center font-bold shadow-inner">
-                  <PenTool className="w-5 h-5 text-brand-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-extrabold text-slate-800 tracking-tight">100% Authentic MD Paper</p>
-                  <p className="text-[10px] text-slate-500 font-medium mt-0.5">Bleed-resistant fountain pen paper</p>
-                </div>
+              {/* Dot Indicators */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 bg-slate-900/35 backdrop-blur-sm px-2.5 py-1.5 rounded-full">
+                {HERO_IMAGES.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                      currentSlide === index ? 'bg-white w-4' : 'bg-white/60 hover:bg-white'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* MD Paper Floating badge */}
+            <div className="absolute -bottom-10 -left-6 z-30 bg-white/85 backdrop-blur-md p-4.5 rounded-2xl border border-brand-200/60 shadow-xl hidden sm:flex items-center gap-3 animate-float-badge delay-400">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-300 to-brand-100 text-brand-700 flex items-center justify-center font-bold shadow-inner">
+                <PenTool className="w-5 h-5 text-brand-600" />
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-slate-800 tracking-tight">100% Authentic MD Paper</p>
+                <p className="text-[10px] text-slate-500 font-medium mt-0.5">Bleed-resistant fountain pen paper</p>
               </div>
             </div>
           </div>
