@@ -5,10 +5,18 @@ import { getProductsApi } from '../api/products';
 import { getCategoriesApi } from '../api/categories';
 import { ProductGrid } from '../components/product/ProductGrid';
 
+const HERO_IMAGES = [
+  "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80"
+];
+
 export const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,6 +34,13 @@ export const Home = () => {
       }
     };
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 4500);
+    return () => clearInterval(timer);
   }, []);
 
   return (
@@ -62,15 +77,41 @@ export const Home = () => {
               </div>
             </div>
 
-            {/* Hero Image */}
+            {/* Hero Image Slider */}
             <div className="relative flex justify-center animate-scale-in delay-200">
-              <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white animate-float-hero hover:rotate-0 transition-transform duration-500">
-                <img
-                  src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80"
-                  alt="Stationery Journal & Pen"
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white animate-float-hero">
+                <div
+                  className="flex h-full transition-transform duration-700 ease-in-out"
+                  style={{ transform: `translateX(-${currentSlide * 100}%)`, width: `${HERO_IMAGES.length * 100}%` }}
+                >
+                  {HERO_IMAGES.map((src, index) => (
+                    <div key={index} className="w-full h-full shrink-0">
+                      <img
+                        src={src}
+                        alt={`Featured Stationery ${index + 1}`}
+                        className="w-full h-full object-cover select-none"
+                        draggable="false"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Dot Indicators */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 bg-slate-900/35 backdrop-blur-sm px-2.5 py-1.5 rounded-full">
+                  {HERO_IMAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                        currentSlide === index ? 'bg-white w-4' : 'bg-white/60 hover:bg-white'
+                      }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
+
+              {/* MD Paper Floating badge */}
               <div className="absolute -bottom-6 -left-6 bg-white/80 backdrop-blur-lg p-5 rounded-2xl border border-brand-200/60 shadow-xl hidden sm:flex items-center gap-3 animate-float-badge delay-400">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-300 to-brand-100 text-brand-700 flex items-center justify-center font-bold shadow-inner">
                   <PenTool className="w-5 h-5 text-brand-600" />
