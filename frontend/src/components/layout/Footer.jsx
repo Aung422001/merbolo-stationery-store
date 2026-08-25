@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Heart } from 'lucide-react';
+import { BookOpen, Phone, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Footer = () => {
@@ -14,8 +14,18 @@ export const Footer = () => {
               </div>
               <span className="font-bold text-lg text-white">MerboloEbook</span>
             </div>
-
+            <div className="space-y-1.5 pt-1">
+              <a href="tel:+959250256634" className="flex items-center gap-2 text-xs text-slate-400 hover:text-brand-400 transition-colors">
+                <Phone className="w-3.5 h-3.5 shrink-0" />
+                +959 250 256 634
+              </a>
+              <a href="mailto:heinkhaing448@gmail.com" className="flex items-center gap-2 text-xs text-slate-400 hover:text-brand-400 transition-colors">
+                <Mail className="w-3.5 h-3.5 shrink-0" />
+                heinkhaing448@gmail.com
+              </a>
+            </div>
           </div>
+
 
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">Shop Categories</h4>
@@ -40,7 +50,7 @@ export const Footer = () => {
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">About MerboloEbook</h4>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Built as a portfolio-grade full-stack e-commerce project with React, Express, and MongoDB.
+              MerboloEbook is your trusted online stationery store in Myanmar — offering a wide range of quality notebooks, pens, art supplies, and creative tools. We bring you the best stationery products at affordable prices, delivered straight to your door.
             </p>
           </div>
         </div>
