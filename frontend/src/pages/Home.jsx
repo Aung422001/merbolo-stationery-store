@@ -53,12 +53,7 @@ export const Home = () => {
                   Explore Shop
                   <ArrowRight className="w-5 h-5" />
                 </Link>
-                <Link
-                  to="/shop?category=notebooks-journals"
-                  className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-brand-900 bg-white hover:bg-brand-50 border border-brand-200 rounded-xl shadow-sm transition-all"
-                >
-                  View Journals
-                </Link>
+
               </div>
             </div>
 
