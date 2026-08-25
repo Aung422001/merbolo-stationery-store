@@ -64,20 +64,20 @@ export const Home = () => {
 
             {/* Hero Image */}
             <div className="relative flex justify-center animate-scale-in delay-200">
-              <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white animate-float hover:rotate-0 transition-transform duration-500">
+              <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white animate-float-hero hover:rotate-0 transition-transform duration-500">
                 <img
                   src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80"
                   alt="Stationery Journal & Pen"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="absolute -bottom-6 -left-6 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-brand-200 shadow-xl hidden sm:flex items-center gap-3 animate-fade-in-up delay-400">
-                <div className="w-10 h-10 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold">
-                  <PenTool className="w-5 h-5" />
+              <div className="absolute -bottom-6 -left-6 bg-white/80 backdrop-blur-lg p-5 rounded-2xl border border-brand-200/60 shadow-xl hidden sm:flex items-center gap-3 animate-float-badge delay-400">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-300 to-brand-100 text-brand-700 flex items-center justify-center font-bold shadow-inner">
+                  <PenTool className="w-5 h-5 text-brand-600" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-800">100% Authentic MD Paper</p>
-                  <p className="text-[11px] text-slate-500">Bleed-resistant fountain pen paper</p>
+                  <p className="text-xs font-extrabold text-slate-800 tracking-tight">100% Authentic MD Paper</p>
+                  <p className="text-[10px] text-slate-500 font-medium mt-0.5">Bleed-resistant fountain pen paper</p>
                 </div>
               </div>
             </div>
