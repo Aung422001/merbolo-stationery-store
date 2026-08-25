@@ -81,121 +81,64 @@ export const Shop = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Header & Search */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-100 pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 font-serif">Stationery Shop</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Showing {total} product{total === 1 ? '' : 's'}
-          </p>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+      {/* Horizontal Filter Bar (Includes Search bar inside) */}
+      <ProductFilters
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={(cat) => {
+          setSelectedCategory(cat);
+          setPage(1);
+        }}
+        minPrice={minPrice}
+        setMinPrice={(val) => {
+          setMinPrice(val);
+          setPage(1);
+        }}
+        maxPrice={maxPrice}
+        setMaxPrice={(val) => {
+          setMaxPrice(val);
+          setPage(1);
+        }}
+        sort={sort}
+        onSelectSort={setSort}
+        onReset={handleResetFilters}
+        searchTerm={searchTerm}
+        setSearchTerm={(val) => {
+          setSearchTerm(val);
+          setPage(1);
+        }}
+      />
 
-        {/* Search Bar & Mobile Filter Toggle */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 md:w-80">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search notebooks, pens, paper..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1);
-              }}
-              className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-brand-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
-            />
-          </div>
+      {/* Products Grid Area (Full Width) */}
+      <main className="space-y-8">
+        <ProductGrid products={products} isLoading={loading} />
 
-          <button
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="md:hidden flex items-center gap-2 px-3 py-2 text-xs font-semibold bg-white border border-brand-200 rounded-xl text-slate-700"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filters
-          </button>
-        </div>
-      </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 pt-4">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+              className="p-2 rounded-lg bg-white border border-brand-200 text-slate-700 disabled:opacity-40 transition-colors hover:bg-brand-50"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-      {/* Main Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Sidebar Filters - Desktop */}
-        <aside className="hidden md:block md:col-span-1">
-          <ProductFilters
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={(cat) => {
-              setSelectedCategory(cat);
-              setPage(1);
-            }}
-            minPrice={minPrice}
-            setMinPrice={(val) => {
-              setMinPrice(val);
-              setPage(1);
-            }}
-            maxPrice={maxPrice}
-            setMaxPrice={(val) => {
-              setMaxPrice(val);
-              setPage(1);
-            }}
-            sort={sort}
-            onSelectSort={setSort}
-            onReset={handleResetFilters}
-          />
-        </aside>
+            <span className="text-xs font-semibold px-4 text-slate-700">
+              Page {page} of {totalPages}
+            </span>
 
-        {/* Mobile Filters Drawer */}
-        {showMobileFilters && (
-          <div className="md:hidden bg-white p-4 rounded-xl border border-brand-200 mb-4">
-            <ProductFilters
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={(cat) => {
-                setSelectedCategory(cat);
-                setPage(1);
-                setShowMobileFilters(false);
-              }}
-              minPrice={minPrice}
-              setMinPrice={setMinPrice}
-              maxPrice={maxPrice}
-              setMaxPrice={setMaxPrice}
-              sort={sort}
-              onSelectSort={setSort}
-              onReset={handleResetFilters}
-            />
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+              className="p-2 rounded-lg bg-white border border-brand-200 text-slate-700 disabled:opacity-40 transition-colors hover:bg-brand-50"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         )}
-
-        {/* Products Area */}
-        <main className="md:col-span-3 space-y-8">
-          <ProductGrid products={products} isLoading={loading} />
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 pt-4">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-                className="p-2 rounded-lg bg-white border border-brand-200 text-slate-700 disabled:opacity-40"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-
-              <span className="text-xs font-semibold px-4 text-slate-700">
-                Page {page} of {totalPages}
-              </span>
-
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage(page + 1)}
-                className="p-2 rounded-lg bg-white border border-brand-200 text-slate-700 disabled:opacity-40"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          )}
-        </main>
-      </div>
+      </main>
     </div>
   );
 };
