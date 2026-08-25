@@ -162,6 +162,28 @@ export const Checkout = () => {
         <div className="lg:col-span-1 space-y-6">
           <CartSummary checkoutButton={false} />
 
+          {/* Shipping Policy Notice */}
+          <div className="bg-brand-50 border border-brand-200 rounded-xl p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Truck className="w-4 h-4 text-brand-700 shrink-0" />
+              <p className="text-sm font-bold text-brand-900">Shipping Policy</p>
+            </div>
+            <ul className="text-xs text-slate-600 space-y-1.5 pl-1">
+              <li className="flex items-start gap-2">
+                <span className="text-brand-600 font-bold mt-0.5">•</span>
+                Flat shipping fee: <span className="font-semibold text-slate-800 ml-1">MMK 500</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                Orders over <span className="font-semibold text-slate-800 mx-1">MMK 10,000</span> get <span className="font-bold text-emerald-600 ml-1">FREE shipping!</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-brand-600 font-bold mt-0.5">•</span>
+                Delivery within Myanmar only
+              </li>
+            </ul>
+          </div>
+
           <Button
             type="submit"
             variant="primary"

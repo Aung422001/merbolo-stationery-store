@@ -43,7 +43,6 @@ export const Footer = () => {
             <ul className="space-y-2 text-xs">
               <li><Link to="/cart" className="hover:text-brand-400">View Cart</Link></li>
               <li><Link to="/account" className="hover:text-brand-400">Order History</Link></li>
-              <li><span className="text-slate-500">Shipping Policy (MMK 500 flat, free over K 10,000)</span></li>
             </ul>
           </div>
 
