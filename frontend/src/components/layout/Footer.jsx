@@ -14,9 +14,7 @@ export const Footer = () => {
               </div>
               <span className="font-bold text-lg text-white">MerboloEbook</span>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Curated Japanese & global stationery, notebooks, fountain pens, and bullet journaling tools.
-            </p>
+
           </div>
 
           <div>
@@ -49,9 +47,7 @@ export const Footer = () => {
 
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} MerboloEbook. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Crafted with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> for stationery lovers.
-          </p>
+
         </div>
       </div>
     </footer>
