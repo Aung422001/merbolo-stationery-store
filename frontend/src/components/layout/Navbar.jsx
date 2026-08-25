@@ -20,8 +20,8 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-sm group-hover:bg-brand-700 transition-colors">
+          <Link to="/" className="flex items-center gap-2 group transition-transform duration-200 hover:scale-[1.02]">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center text-white shadow-sm group-hover:shadow-md transition-all">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
@@ -36,11 +36,13 @@ export const Navbar = () => {
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link to="/" className="text-slate-600 hover:text-brand-700 transition-colors">
+            <Link to="/" className="relative text-slate-600 hover:text-brand-700 transition-colors py-1 group/nav">
               Home
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-500 transition-all duration-300 group-hover/nav:w-full" />
             </Link>
-            <Link to="/shop" className="text-slate-600 hover:text-brand-700 transition-colors">
+            <Link to="/shop" className="relative text-slate-600 hover:text-brand-700 transition-colors py-1 group/nav">
               Shop All
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-500 transition-all duration-300 group-hover/nav:w-full" />
             </Link>
           </nav>
 
@@ -49,12 +51,12 @@ export const Navbar = () => {
             {/* Cart Icon */}
             <Link
               to="/cart"
-              className="relative p-2 text-slate-700 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors"
+              className="relative p-2 text-slate-700 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors group/cart"
               aria-label="Shopping Cart"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5 transition-transform duration-200 group-hover/cart:scale-110" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-brand-600 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-brand-700 to-brand-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow scale-100 hover:scale-110 transition-transform animate-scale-in">
                   {itemCount}
                 </span>
               )}
@@ -95,9 +97,9 @@ export const Navbar = () => {
                 >
                   Log In
                 </Link>
-                <Link
+                 <Link
                   to="/register"
-                  className="px-3.5 py-1.5 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors"
+                  className="px-3.5 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-brand-700 to-brand-500 hover:from-brand-800 hover:to-brand-600 rounded-lg shadow-sm transition-all hover:scale-[1.02]"
                 >
                   Sign Up
                 </Link>
@@ -107,19 +109,19 @@ export const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-3">
-            <Link to="/cart" className="relative p-2 text-slate-700">
-              <ShoppingBag className="w-5 h-5" />
+            <Link to="/cart" className="relative p-2 text-slate-700 group/cart">
+              <ShoppingBag className="w-5 h-5 transition-transform duration-200 group-hover/cart:scale-110" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-brand-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-brand-700 to-brand-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-scale-in">
                   {itemCount}
                 </span>
               )}
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-700 hover:bg-brand-50 rounded-lg"
+              className="p-2 text-slate-700 hover:bg-brand-50 rounded-lg transition-transform duration-200 active:scale-95"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-6 h-6 rotate-90 transition-transform duration-300" /> : <Menu className="w-6 h-6 transition-transform duration-300" />}
             </button>
           </div>
         </div>
@@ -182,7 +184,7 @@ export const Navbar = () => {
               <Link
                 to="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-center py-2 text-sm font-medium text-white bg-brand-600 rounded-lg"
+                className="block text-center py-2 text-sm font-medium text-white bg-gradient-to-r from-brand-700 to-brand-500 rounded-lg shadow-sm"
               >
                 Sign Up
               </Link>

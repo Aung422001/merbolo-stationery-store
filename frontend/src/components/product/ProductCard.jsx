@@ -21,7 +21,7 @@ export const ProductCard = ({ product }) => {
   const image = product.images?.[0] || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
 
   return (
-    <div className="group bg-white rounded-2xl border border-brand-100/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full">
+    <div className="group bg-white rounded-2xl border border-brand-100/80 overflow-hidden shadow-sm hover-lift flex flex-col h-full animate-scale-in">
       {/* Image container */}
       <Link to={`/product/${product.slug}`} className="relative aspect-square overflow-hidden bg-brand-50 block">
         <img
