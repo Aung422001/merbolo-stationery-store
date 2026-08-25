@@ -9,6 +9,35 @@ export const Navbar = () => {
   const itemCount = useCartStore((state) => state.getItemCount());
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  React.useEffect(() => {
+    // Expose toggle globally to button
+    window.__toggleUserDropdown = (forceState) => {
+      const panel = document.getElementById('user-dropdown-panel');
+      if (!panel) return;
+      const nextState = typeof forceState === 'boolean' ? forceState : panel.classList.contains('hidden');
+      if (nextState) {
+        panel.classList.remove('hidden');
+      } else {
+        panel.classList.add('hidden');
+      }
+    };
+
+    const handleClickOutside = (event) => {
+      const button = document.getElementById('user-menu-button');
+      const panel = document.getElementById('user-dropdown-panel');
+      if (button && panel && !button.contains(event.target) && !panel.contains(event.target)) {
+        panel.classList.add('hidden');
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      delete window.__toggleUserDropdown;
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -64,30 +93,65 @@ export const Navbar = () => {
 
             {/* Auth section */}
             {isAuthenticated ? (
-              <div className="flex items-center gap-3 pl-2 border-l border-brand-200">
-                {user?.role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-md transition-colors"
-                  >
-                    <Shield className="w-3.5 h-3.5" />
-                    Admin Panel
-                  </Link>
-                )}
-                <Link
-                  to="/account"
-                  className="flex items-center gap-2 text-sm text-slate-700 hover:text-brand-700 font-medium px-2 py-1 rounded-md"
-                >
-                  <User className="w-4 h-4 text-brand-600" />
-                  <span>{user?.name?.split(' ')[0]}</span>
-                </Link>
+              <div className="relative border-l border-brand-200 pl-4">
                 <button
-                  onClick={handleLogout}
-                  className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                  title="Logout"
+                  onClick={() => {
+                    // Toggle profile dropdown
+                    window.__toggleUserDropdown ? window.__toggleUserDropdown() : null;
+                  }}
+                  id="user-menu-button"
+                  className="flex items-center gap-2 text-sm text-slate-700 hover:text-brand-700 font-semibold px-3 py-2 bg-brand-50 hover:bg-brand-100/80 rounded-xl border border-brand-200/50 transition-all duration-200 cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-700 to-brand-500 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                    {user?.name?.[0]?.toUpperCase() || 'A'}
+                  </div>
+                  <span>{user?.name?.split(' ')[0] || 'User'}</span>
+                  <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
+
+                {/* Dropdown panel container */}
+                <div
+                  id="user-dropdown-panel"
+                  className="hidden absolute right-0 mt-2 w-52 bg-white rounded-2xl border border-brand-100 shadow-xl py-2 z-50 animate-scale-in"
+                >
+                  <div className="px-4 py-2 border-b border-brand-50">
+                    <p className="text-xs font-bold text-slate-800 truncate">{user?.name}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+                  </div>
+
+                  {user?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      onClick={() => window.__toggleUserDropdown && window.__toggleUserDropdown(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-brand-50 transition-colors font-medium"
+                    >
+                      <Shield className="w-4 h-4 text-amber-600" />
+                      Admin Panel
+                    </Link>
+                  )}
+
+                  <Link
+                    to="/account"
+                    onClick={() => window.__toggleUserDropdown && window.__toggleUserDropdown(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-brand-50 transition-colors font-medium"
+                  >
+                    <User className="w-4 h-4 text-brand-600" />
+                    My Account
+                  </Link>
+
+                  <button
+                    onClick={() => {
+                      if (window.__toggleUserDropdown) window.__toggleUserDropdown(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors font-medium text-left border-t border-brand-50 mt-1 cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Log Out
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-2">
