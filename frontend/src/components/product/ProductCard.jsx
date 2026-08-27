@@ -1,24 +1,38 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Check } from 'lucide-react';
+import { ShoppingCart, Plus, Minus } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { useCartStore } from '../../store/cartStore';
 import { Button } from '../ui/Button';
 
 export const ProductCard = ({ product }) => {
   const addItem = useCartStore((state) => state.addItem);
-  const [added, setAdded] = React.useState(false);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const cartItem = useCartStore((state) =>
+    state.items.find((i) => i.productId === (product._id || product.id))
+  );
+  const quantityInCart = cartItem?.quantity || 0;
+
+  const isOutOfStock = product.stock <= 0;
+  const image = product.images?.[0] || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(product, 1);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
   };
 
-  const isOutOfStock = product.stock <= 0;
-  const image = product.images?.[0] || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
+  const handleIncrease = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (quantityInCart >= product.stock) return;
+    updateQuantity(product._id || product.id, quantityInCart + 1);
+  };
+
+  const handleDecrease = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateQuantity(product._id || product.id, quantityInCart - 1);
+  };
 
   return (
     <div className="group bg-white rounded-2xl border border-brand-100/80 overflow-hidden shadow-sm hover-lift flex flex-col h-full animate-scale-in">
@@ -70,20 +84,39 @@ export const ProductCard = ({ product }) => {
             )}
           </div>
 
-          <Button
-            size="sm"
-            variant={added ? 'secondary' : 'primary'}
-            disabled={isOutOfStock}
-            onClick={handleAddToCart}
-            className="!px-3"
-            title="Add to cart"
-          >
-            {added ? (
-              <Check className="w-4 h-4 text-emerald-700" />
-            ) : (
+          {quantityInCart > 0 ? (
+            <div className="flex items-center gap-1.5 bg-brand-50 border border-brand-200 rounded-lg px-1 py-1">
+              <button
+                onClick={handleDecrease}
+                className="w-6 h-6 rounded-md hover:bg-brand-200 flex items-center justify-center text-slate-700 transition-colors cursor-pointer"
+                title="Decrease quantity"
+              >
+                <Minus className="w-3.5 h-3.5" />
+              </button>
+              <span className="w-5 text-center text-sm font-bold text-slate-800">
+                {quantityInCart}
+              </span>
+              <button
+                onClick={handleIncrease}
+                disabled={quantityInCart >= product.stock}
+                className="w-6 h-6 rounded-md hover:bg-brand-200 flex items-center justify-center text-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                title="Increase quantity"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              variant="primary"
+              disabled={isOutOfStock}
+              onClick={handleAddToCart}
+              className="!px-3"
+              title="Add to cart"
+            >
               <ShoppingCart className="w-4 h-4" />
-            )}
-          </Button>
+            </Button>
+          )}
         </div>
       </div>
     </div>
