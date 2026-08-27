@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Filter, RotateCcw, Search, ChevronDown, Check } from 'lucide-react';
+import { RotateCcw, Search, ChevronDown, Check } from 'lucide-react';
 
 const FilterDropdown = ({ label, value, options, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,6 +81,10 @@ export const ProductFilters = ({
     { value: 'price-desc', label: 'Price: High to Low' }
   ];
 
+  const hasActiveFilters = Boolean(
+    selectedCategory || searchTerm || minPrice || maxPrice || (sort && sort !== 'newest')
+  );
+
   return (
     <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-100 shadow-sm space-y-4">
       {/* Upper line: Search Bar and Reset button */}
@@ -97,20 +101,18 @@ export const ProductFilters = ({
           />
         </div>
 
-        {/* Filters title & Reset Button */}
-        <div className="flex items-center justify-between sm:justify-end gap-4 px-1 sm:px-0">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden lg:inline-flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-brand-600" />
-            Filters
-          </span>
-          <button
-            onClick={onReset}
-            className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 rounded-xl flex items-center gap-1.5 font-bold transition-all cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Reset Filters
-          </button>
-        </div>
+        {/* Reset Button */}
+        {hasActiveFilters && (
+          <div className="flex items-center justify-end px-1 sm:px-0">
+            <button
+              onClick={onReset}
+              className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 rounded-xl flex items-center gap-1.5 font-bold transition-all cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset Filters
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Lower line: Dropdown buttons & Price inputs */}
