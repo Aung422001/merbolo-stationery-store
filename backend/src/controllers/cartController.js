@@ -122,3 +122,18 @@ export const removeCartItem = async (req, res, next) => {
     next(error);
   }
 };
+
+export const clearUserCart = async (req, res, next) => {
+  try {
+    let cart = await Cart.findOne({ user: req.user._id });
+    if (!cart) {
+      cart = await Cart.create({ user: req.user._id, items: [] });
+    } else {
+      cart.items = [];
+      await cart.save();
+    }
+    res.json({ success: true, data: cart });
+  } catch (error) {
+    next(error);
+  }
+};

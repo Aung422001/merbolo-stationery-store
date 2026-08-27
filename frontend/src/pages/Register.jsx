@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Button';
 
 export const Register = () => {
   const { register, isAuthenticated } = useAuthStore();
-  const mergeGuestCartOnLogin = useCartStore((state) => state.mergeGuestCartOnLogin);
+  const discardGuestCartOnLogin = useCartStore((state) => state.discardGuestCartOnLogin);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -36,7 +36,7 @@ export const Register = () => {
     const result = await register({ name, email, password });
 
     if (result.success) {
-      await mergeGuestCartOnLogin();
+      await discardGuestCartOnLogin();
       navigate(location.state?.from?.pathname || '/', { replace: true });
     } else {
       setError(result.message);

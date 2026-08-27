@@ -83,11 +83,11 @@ export const Home = () => {
                 {HERO_IMAGES.map((src, index) => {
                   let position = "inactive";
                   let offset = index - currentSlide;
-                  
+
                   // Wrap index difference around array length
                   if (offset < -1) offset += HERO_IMAGES.length;
                   if (offset > 1) offset -= HERO_IMAGES.length;
-                  
+
                   // Adjust wrapping logic for edge cases where the difference is exactly half
                   if (offset === 0) {
                     position = "active";
@@ -133,9 +133,8 @@ export const Home = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                      currentSlide === index ? 'bg-white w-4' : 'bg-white/60 hover:bg-white'
-                    }`}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${currentSlide === index ? 'bg-white w-4' : 'bg-white/60 hover:bg-white'
+                      }`}
                     aria-label={`Go to slide ${index + 1}`}
                   />
                 ))}
@@ -148,7 +147,6 @@ export const Home = () => {
                 <PenTool className="w-5 h-5 text-brand-600" />
               </div>
               <div>
-                <p className="text-xs font-extrabold text-slate-800 tracking-tight">100% Authentic MD Paper</p>
                 <p className="text-[10px] text-slate-500 font-medium mt-0.5">Bleed-resistant fountain pen paper</p>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getCartApi, addToCartApi, updateCartItemApi, removeCartItemApi } from '../api/cart';
+import { getCartApi, addToCartApi, updateCartItemApi, removeCartItemApi, clearCartApi } from '../api/cart';
 import { useAuthStore } from './authStore';
 
 const GUEST_CART_KEY = 'merbolo_guest_cart';
@@ -155,28 +155,26 @@ export const useCartStore = create((set, get) => ({
     }
   },
 
-  clearCart: () => {
-    localStorage.removeItem(GUEST_CART_KEY);
-    set({ items: [] });
+  clearCart: async () => {
+    const { isAuthenticated } = useAuthStore.getState();
+
+    if (isAuthenticated) {
+      try {
+        set({ isLoading: true });
+        await clearCartApi();
+        set({ items: [], isLoading: false });
+      } catch (error) {
+        console.error('Failed to clear server cart:', error);
+        set({ isLoading: false });
+      }
+    } else {
+      localStorage.removeItem(GUEST_CART_KEY);
+      set({ items: [] });
+    }
   },
 
-  mergeGuestCartOnLogin: async () => {
-    const guestItems = loadGuestCart();
-    if (guestItems.length === 0) {
-      await get().fetchCart();
-      return;
-    }
-
-    try {
-      set({ isLoading: true });
-      for (const item of guestItems) {
-        await addToCartApi(item.productId, item.quantity);
-      }
-      localStorage.removeItem(GUEST_CART_KEY);
-      await get().fetchCart();
-    } catch (error) {
-      console.error('Failed to merge guest cart on login:', error);
-      set({ isLoading: false });
-    }
+  discardGuestCartOnLogin: async () => {
+    localStorage.removeItem(GUEST_CART_KEY);
+    await get().fetchCart();
   }
 }));

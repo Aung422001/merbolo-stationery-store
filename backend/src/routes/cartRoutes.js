@@ -4,7 +4,8 @@ import {
   getCart,
   addItemToCart,
   updateCartItemQuantity,
-  removeCartItem
+  removeCartItem,
+  clearUserCart
 } from '../controllers/cartController.js';
 import { protect } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
@@ -27,5 +28,6 @@ router.post(
 
 router.put('/items/:productId', updateCartItemQuantity);
 router.delete('/items/:productId', removeCartItem);
+router.delete('/', clearUserCart);
 
 export default router;
