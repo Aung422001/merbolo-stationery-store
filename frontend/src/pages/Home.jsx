@@ -68,7 +68,7 @@ export const Home = () => {
               <div className="animate-fade-in-up delay-300 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2">
                 <Link
                   to="/shop"
-                  className="btn-glow inline-flex items-center justify-center px-7 py-4 text-base font-bold text-white bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 rounded-xl shadow-lg hover:shadow-xl transition-all gap-2 hover:-translate-y-0.5"
+                  className="btn-glow inline-flex items-center justify-center px-7 py-4 text-base font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg hover:shadow-xl transition-all gap-2 hover:-translate-y-0.5"
                 >
                   Explore Shop
                   <ArrowRight className="w-5 h-5" />
