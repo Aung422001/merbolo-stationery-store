@@ -63,7 +63,11 @@ export const CartItem = ({ item }) => {
 
       {/* Delete button */}
       <button
-        onClick={() => removeItem(productId)}
+        onClick={() => {
+          if (window.confirm(`Remove "${name}" from your cart?`)) {
+            removeItem(productId);
+          }
+        }}
         className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
         title="Remove item"
       >
