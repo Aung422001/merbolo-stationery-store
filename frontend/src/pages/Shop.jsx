@@ -33,6 +33,12 @@ export const Shop = () => {
   const debouncedMaxPrice = useDebounce(maxPrice, 400);
 
   useEffect(() => {
+    setSelectedCategory(searchParams.get('category') || '');
+    setSearchTerm(searchParams.get('search') || '');
+    setPage(1);
+  }, [searchParams]);
+
+  useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await getCategoriesApi();
