@@ -50,7 +50,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group transition-transform duration-200 hover:scale-[1.02]">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center text-white shadow-sm group-hover:shadow-md transition-all">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center text-white shadow-sm group-hover:shadow-md transition-all">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
@@ -85,7 +85,7 @@ export const Navbar = () => {
             >
               <ShoppingBag className="w-5 h-5 transition-transform duration-200 group-hover/cart:scale-110" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-brand-700 to-brand-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow scale-100 hover:scale-110 transition-transform animate-scale-in">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-blue-700 to-blue-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow scale-100 hover:scale-110 transition-transform animate-scale-in">
                   {itemCount}
                 </span>
               )}
@@ -102,7 +102,7 @@ export const Navbar = () => {
                   id="user-menu-button"
                   className="flex items-center gap-2 text-sm text-slate-700 hover:text-brand-700 font-semibold px-3 py-2 bg-brand-50 hover:bg-brand-100/80 rounded-xl border border-brand-200/50 transition-all duration-200 cursor-pointer"
                 >
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-700 to-brand-500 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-700 to-blue-500 text-white flex items-center justify-center text-xs font-bold shadow-sm">
                     {user?.name?.[0]?.toUpperCase() || 'A'}
                   </div>
                   <span>{user?.name?.split(' ')[0] || 'User'}</span>
@@ -163,7 +163,7 @@ export const Navbar = () => {
                 </Link>
                  <Link
                   to="/register"
-                  className="px-3.5 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-brand-700 to-brand-500 hover:from-brand-800 hover:to-brand-600 rounded-lg shadow-sm transition-all hover:scale-[1.02]"
+                  className="px-3.5 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 rounded-lg shadow-sm transition-all hover:scale-[1.02]"
                 >
                   Sign Up
                 </Link>
@@ -176,7 +176,7 @@ export const Navbar = () => {
             <Link to="/cart" className="relative p-2 text-slate-700 group/cart">
               <ShoppingBag className="w-5 h-5 transition-transform duration-200 group-hover/cart:scale-110" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-brand-700 to-brand-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-scale-in">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-blue-700 to-blue-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-scale-in">
                   {itemCount}
                 </span>
               )}
@@ -248,7 +248,7 @@ export const Navbar = () => {
               <Link
                 to="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-center py-2 text-sm font-medium text-white bg-gradient-to-r from-brand-700 to-brand-500 rounded-lg shadow-sm"
+                className="block text-center py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-700 to-blue-500 rounded-lg shadow-sm"
               >
                 Sign Up
               </Link>
