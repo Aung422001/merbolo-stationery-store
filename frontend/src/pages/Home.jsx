@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Truck, ShieldCheck, PenTool, BookOpen } from 'lucide-react';
+import { ArrowRight, Sparkles, Truck, ShieldCheck, BookOpen } from 'lucide-react';
 import { getProductsApi } from '../api/products';
 import { getCategoriesApi } from '../api/categories';
 import { ProductGrid } from '../components/product/ProductGrid';
@@ -141,15 +141,6 @@ export const Home = () => {
               </div>
             </div>
 
-            {/* MD Paper Floating badge */}
-            <div className="absolute -bottom-10 -left-6 z-30 bg-white/85 backdrop-blur-md p-4.5 rounded-2xl border border-brand-200/60 shadow-xl hidden sm:flex items-center gap-3 animate-float-badge delay-400">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-300 to-brand-100 text-brand-700 flex items-center justify-center font-bold shadow-inner">
-                <PenTool className="w-5 h-5 text-brand-600" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-500 font-medium mt-0.5">Bleed-resistant fountain pen paper</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -163,7 +154,7 @@ export const Home = () => {
             </div>
             <div>
               <h4 className="font-bold text-slate-900 text-sm">Free Express Delivery</h4>
-              <p className="text-xs text-slate-500 mt-0.5">Complimentary shipping on orders over K 1,000 across Myanmar.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Complimentary shipping on orders over MMK 1,000 across Myanmar.</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
