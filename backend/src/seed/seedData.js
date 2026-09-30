@@ -1,11 +1,9 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import dotenv from 'dotenv';
+import '../config/env.js';
 import Category from '../models/Category.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
-
-dotenv.config();
 
 const categories = [
   {
