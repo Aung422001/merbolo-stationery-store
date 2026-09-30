@@ -35,6 +35,12 @@ const getApiUrl = () => {
     return '/api';
   }
 
+  // On Vercel, /api is forwarded to the backend by the api/proxy.js function (see vercel.json),
+  // so the browser only talks to its own origin. The backend address is configured there via BACKEND_URL.
+  if (typeof __DEPLOYED_ON_VERCEL__ !== 'undefined' && __DEPLOYED_ON_VERCEL__) {
+    return '/api';
+  }
+
   if (envUrl && !envUrl.includes('localhost')) {
     return envUrl;
   }

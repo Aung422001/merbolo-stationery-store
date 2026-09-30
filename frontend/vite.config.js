@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    define: {
+      // Vercel sets VERCEL=1 during its builds; those deployments serve /api through api/proxy.js
+      __DEPLOYED_ON_VERCEL__: JSON.stringify(Boolean(process.env.VERCEL))
+    },
     server: {
       port: 5173,
       host: true,
