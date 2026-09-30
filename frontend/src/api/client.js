@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
+// Deployed backend on Render, used when a production build has no valid VITE_API_URL
+const DEFAULT_PROD_API_URL = 'https://merbolo-stationery-store.onrender.com/api';
+
 const trimSlash = (url) => url.replace(/\/+$/, '');
 
 // Clean up VITE_API_URL as typed into a hosting dashboard: stray quotes/whitespace,
@@ -42,11 +45,11 @@ const getApiUrl = () => {
     return `https://${backendHost}/api`;
   }
 
-  // Production build without a usable VITE_API_URL: assume the API is served from the same origin
+  // Production build (e.g. on Vercel) without a usable VITE_API_URL: use the deployed Render backend
   // rather than pointing visitors' browsers at their own localhost.
   if (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
-    console.warn('[api] VITE_API_URL is not set for this build; falling back to same-origin /api');
-    return '/api';
+    console.warn(`[api] VITE_API_URL is not set for this build; falling back to ${DEFAULT_PROD_API_URL}`);
+    return DEFAULT_PROD_API_URL;
   }
 
   return envUrl || 'http://localhost:5000/api';
@@ -72,6 +75,8 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
+const MAX_NETWORK_RETRIES = 3;
+
 const NETWORK_ERROR_MESSAGE =
   'Unable to reach the server. It may be starting up — please wait a moment and try again.';
 
@@ -91,11 +96,12 @@ client.interceptors.response.use(
   async (error) => {
     const { config } = error;
 
-    // Connection failed outright (server asleep, restarting or unreachable): retry once before giving up.
+    // Connection failed outright (server asleep, restarting or unreachable): retry with backoff (2s, 4s, 8s).
     // Timeouts are not retried, since the server may already have processed the request.
-    if (error.code === 'ERR_NETWORK' && config && !config.__retried) {
-      config.__retried = true;
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    const retryCount = config?.__retryCount || 0;
+    if (error.code === 'ERR_NETWORK' && config && retryCount < MAX_NETWORK_RETRIES) {
+      config.__retryCount = retryCount + 1;
+      await new Promise((resolve) => setTimeout(resolve, 2000 * 2 ** retryCount));
       return client(config);
     }
 
@@ -111,5 +117,11 @@ client.interceptors.response.use(
     return Promise.reject({ message, errors, status: error.response?.status });
   }
 );
+
+// Wake the backend as soon as the app loads (free-tier hosts sleep when idle),
+// so it is ready by the time the user submits a form.
+if (typeof window !== 'undefined' && !import.meta.env.DEV) {
+  fetch(`${API_URL}/health`, { mode: 'cors' }).catch(() => {});
+}
 
 export default client;
