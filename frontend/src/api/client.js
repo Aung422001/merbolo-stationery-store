@@ -3,9 +3,27 @@ import { useAuthStore } from '../store/authStore';
 
 const trimSlash = (url) => url.replace(/\/+$/, '');
 
+// Clean up VITE_API_URL as typed into a hosting dashboard: stray quotes/whitespace,
+// a missing "https://", or a missing "/api" suffix. Returns null if it still isn't a valid URL.
+const normalizeApiUrl = (raw) => {
+  if (!raw || raw === 'undefined') return null;
+  let url = String(raw).trim().replace(/^['"]+|['"]+$/g, '').trim();
+  if (!url) return null;
+  if (url.startsWith('/')) return trimSlash(url) || '/api';
+  if (!/^https?:\/\//i.test(url)) url = `https://${url.replace(/^\/+/, '')}`;
+  try {
+    const parsed = new URL(url);
+    let pathname = trimSlash(parsed.pathname);
+    if (!pathname.endsWith('/api')) pathname = `${pathname}/api`;
+    return `${parsed.origin}${pathname}`;
+  } catch {
+    console.error(`[api] Ignoring invalid VITE_API_URL: "${raw}"`);
+    return null;
+  }
+};
+
 const getApiUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  const hasEnvUrl = envUrl && envUrl !== 'undefined';
+  const envUrl = normalizeApiUrl(import.meta.env.VITE_API_URL);
 
   // In development, always go through the Vite dev-server proxy (see vite.config.js).
   // A same-origin relative URL works from localhost, a LAN IP or a phone, whereas
@@ -14,8 +32,8 @@ const getApiUrl = () => {
     return '/api';
   }
 
-  if (hasEnvUrl && !envUrl.includes('localhost')) {
-    return trimSlash(envUrl);
+  if (envUrl && !envUrl.includes('localhost')) {
+    return envUrl;
   }
 
   if (typeof window !== 'undefined' && window.location.hostname.endsWith('.onrender.com')) {
@@ -31,7 +49,7 @@ const getApiUrl = () => {
     return '/api';
   }
 
-  return hasEnvUrl ? trimSlash(envUrl) : 'http://localhost:5000/api';
+  return envUrl || 'http://localhost:5000/api';
 };
 
 export const API_URL = getApiUrl();
@@ -57,9 +75,19 @@ client.interceptors.request.use((config) => {
 const NETWORK_ERROR_MESSAGE =
   'Unable to reach the server. It may be starting up — please wait a moment and try again.';
 
+const SERVER_CONFIG_MESSAGE =
+  'The shop cannot connect to its server right now. Please try again later.';
+
 // Normalize API response and errors
 client.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    // An HTML page instead of JSON means the request hit the frontend host, not the API
+    if (typeof response.data === 'string' && /^\s*<(!doctype|html)/i.test(response.data)) {
+      console.error(`[api] ${API_URL} returned HTML, not JSON — check VITE_API_URL`);
+      return Promise.reject({ message: SERVER_CONFIG_MESSAGE, errors: [], status: response.status });
+    }
+    return response.data;
+  },
   async (error) => {
     const { config } = error;
 
