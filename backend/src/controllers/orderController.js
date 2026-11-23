@@ -8,9 +8,7 @@ export const createOrder = async (req, res, next) => {
 
     let itemsToProcess = [];
 
-    if (directItems && directItems.length > 0) {
-      itemsToProcess = directItems;
-    } else {
+    {
       const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
       if (!cart || cart.items.length === 0) {
         return res.status(400).json({ success: false, message: 'Cart is empty' });
@@ -33,6 +31,9 @@ export const createOrder = async (req, res, next) => {
         });
       }
 
+      if (!Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > product.stock) {
+        return res.status(400).json({ success: false, message: 'Invalid quantity or insufficient stock' });
+      }
       const itemPrice = product.price;
       subtotal += itemPrice * item.quantity;
 
@@ -43,9 +44,7 @@ export const createOrder = async (req, res, next) => {
         quantity: item.quantity
       });
 
-      // Deduct stock
-      product.stock = Math.max(0, product.stock - item.quantity);
-      await product.save();
+      // Inventory is reserved only after payment is verified by the server.
     }
 
     const shippingFee = subtotal > 1000 ? 0 : 50; // Free shipping over 1000 THB
@@ -59,7 +58,7 @@ export const createOrder = async (req, res, next) => {
       shippingFee,
       total,
       paymentIntentId: paymentIntentId || '',
-      paymentStatus: paymentIntentId ? 'paid' : 'pending'
+      paymentStatus: 'pending'
     });
 
     // Clear user cart
