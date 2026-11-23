@@ -12,7 +12,7 @@ async function checkoutUser(page, request) {
   const { data } = await registered.json();
   const headers = { Authorization: 'Bearer ' + data.token };
   const cart = await request.post(API + '/cart/items', { headers, data: { productId: PRODUCT_ID, quantity: 1 } });
-  expect(cart.ok()).toBeTruthy();
+  expect(cart.ok(), 'cart API status=' + cart.status() + ' body=' + await cart.text()).toBeTruthy();
   await page.addInitScript(token => localStorage.setItem('merbolo_token', token), data.token);
   await page.goto('/checkout');
   await expect(page.getByRole('heading', { name: 'Checkout' })).toBeVisible();
