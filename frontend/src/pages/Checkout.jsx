@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
@@ -37,8 +36,7 @@ const PaymentForm = ({ orderId, onError }) => {
 
 export const Checkout = () => {
   const { user } = useAuthStore();
-  const { items, clearCart, getSubtotal } = useCartStore();
-  const navigate = useNavigate();
+  const { items } = useCartStore();
 
   const defaultAddress = user?.addresses?.find((a) => a.isDefault) || user?.addresses?.[0] || {};
 
@@ -184,15 +182,15 @@ export const Checkout = () => {
             <ul className="text-xs text-slate-600 space-y-1.5 pl-1">
               <li className="flex items-start gap-2">
                 <span className="text-brand-600 font-bold mt-0.5">•</span>
-                Flat shipping fee: <span className="font-semibold text-slate-800 ml-1">MMK 500</span>
+                Flat shipping fee: <span className="font-semibold text-slate-800 ml-1">THB 50</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                Orders over <span className="font-semibold text-slate-800 mx-1">MMK 10,000</span> get <span className="font-bold text-emerald-600 ml-1">FREE shipping!</span>
+                Orders over <span className="font-semibold text-slate-800 mx-1">THB 1,000</span> get <span className="font-bold text-emerald-600 ml-1">FREE shipping!</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-brand-600 font-bold mt-0.5">•</span>
-                Delivery within Myanmar only
+                Delivery within Thailand only
               </li>
             </ul>
           </div>
@@ -205,7 +203,7 @@ export const Checkout = () => {
             isLoading={isSubmitting}
             className="w-full gap-2 text-base font-bold shadow-lg"
           >
-            Pay & Confirm Order
+            Continue to Secure Payment
           </Button>
 
           <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1">
