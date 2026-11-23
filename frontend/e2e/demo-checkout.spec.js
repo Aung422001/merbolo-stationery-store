@@ -13,7 +13,12 @@ test('checkout can simulate successful payment without Stripe', async ({ page })
     if(url.includes('/orders/'+orderId)) return json({_id:orderId,isDemo:true,paymentStatus:'paid',items:[{name:'Notebook',price:100,quantity:1}],subtotal:100,shippingFee:50,total:150,shippingAddress:{line1:'Test street',city:'Yangon',province:'Yangon',postalCode:'11111'}});
     return json([]);
   });
+  page.on('pageerror', error => console.error('[E2E pageerror]', error.message));
+  page.on('console', message => { if (message.type() === 'error') console.error('[E2E console]', message.text()); });
   await page.goto('/checkout');
+  await page.waitForTimeout(2500);
+  console.log('[E2E] URL:', page.url());
+  console.log('[E2E] body:', (await page.locator('body').innerText()).slice(0, 1800));
   await expect(page).toHaveURL(/checkout/);
   await expect(page.getByRole('heading',{name:'Checkout'})).toBeVisible({timeout:15000});
   await expect(page.getByText('Demo Payment — No Real Money')).toBeVisible();
