@@ -16,7 +16,7 @@ export const createPaymentIntent = async (req, res, next) => {
     const { orderId } = req.body;
     if (!mongoose.isValidObjectId(orderId)) return res.status(400).json({ success: false, message: 'Invalid order' });
     const order = await Order.findOne({ _id: orderId, user: req.user._id });
-    if (!order || order.paymentStatus !== 'pending') return res.status(409).json({ success: false, message: 'Order not pending' });
+    if (!order || order.paymentStatus !== 'pending' || order.isDemo !== false || order.paymentProvider !== 'stripe') return res.status(409).json({ success: false, message: 'Order is not eligible for Stripe payment' });
     if (order.paymentIntentId) {
       const existing = await stripe().paymentIntents.retrieve(order.paymentIntentId);
       if (existing.status === 'succeeded' || existing.status === 'canceled') {
@@ -49,6 +49,7 @@ export const handleStripeWebhook = async (req, res) => {
     await session.withTransaction(async () => {
       const order = await Order.findOne({ paymentIntentId: intent.id }).session(session);
       if (!order || order.paymentStatus === 'paid') return;
+      if (order.isDemo !== false || order.paymentProvider !== 'stripe') throw new Error('Stripe webhook cannot fulfill a demo order');
       if (order.paymentStatus !== 'pending' || intent.currency !== 'thb' ||
           Math.round(order.total * 100) !== intent.amount_received ||
           String(order._id) !== intent.metadata?.orderId) {
