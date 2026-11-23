@@ -35,6 +35,7 @@ const saveGuestCart = (items) => {
 export const useCartStore = create((set, get) => ({
   items: loadGuestCart(),
   isLoading: false,
+  hasLoadedCart: false,
 
   getItemCount: () => {
     return get().items.reduce((sum, item) => sum + item.quantity, 0);
@@ -69,10 +70,10 @@ export const useCartStore = create((set, get) => ({
             price: isObj ? (i.product.price ?? i.priceAtAdd) : (i.priceAtAdd || 0)
           };
         });
-      set({ items: serverItems, isLoading: false });
+      set({ items: serverItems, isLoading: false, hasLoadedCart: true });
     } catch (error) {
       console.error('Failed to fetch user cart:', error);
-      set({ isLoading: false });
+      set({ isLoading: false, hasLoadedCart: true });
     }
   },
 
