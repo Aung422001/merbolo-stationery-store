@@ -142,7 +142,7 @@ export const getAdminMetrics = async (req, res, next) => {
     const totalOrders = await Order.countDocuments();
     
     const revenueResult = await Order.aggregate([
-      { $match: { paymentStatus: 'paid' } },
+      { $match: { paymentStatus: 'paid', isDemo: false } },
       { $group: { _id: null, totalRevenue: { $sum: '$total' } } }
     ]);
     const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
