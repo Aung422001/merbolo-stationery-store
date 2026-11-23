@@ -4,7 +4,7 @@ import Product from '../models/Product.js';
 
 export const createOrder = async (req, res, next) => {
   try {
-    const { shippingAddress, items: directItems, paymentIntentId } = req.body;
+    const { shippingAddress } = req.body;
 
     let itemsToProcess = [];
 
@@ -57,7 +57,7 @@ export const createOrder = async (req, res, next) => {
       subtotal,
       shippingFee,
       total,
-      paymentIntentId: paymentIntentId || '',
+      paymentIntentId: '',
       paymentStatus: 'pending'
     });
 
