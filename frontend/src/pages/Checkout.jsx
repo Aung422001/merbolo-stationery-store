@@ -38,16 +38,8 @@ export const Checkout = () => {
     setIsSubmitting(true);
 
     try {
-      // 1. Create Stripe Payment Intent (with test mode fallback)
-      let paymentIntentId = `pi_test_${Date.now()}`;
-      try {
-        const intentRes = await createPaymentIntentApi();
-        if (intentRes?.data?.paymentIntentId) {
-          paymentIntentId = intentRes.data.paymentIntentId;
-        }
-      } catch (pErr) {
-        console.warn('Using test mode payment intent fallback');
-      }
+      // Payment confirmation must be completed before checkout can be enabled.
+      throw new Error('Secure card confirmation is not yet implemented. Checkout is temporarily disabled to protect orders.');
 
       // 2. Create Order in DB
       const orderRes = await createOrderApi({
