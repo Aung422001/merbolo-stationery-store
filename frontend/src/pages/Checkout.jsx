@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, Truck, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { CreditCard, Truck, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { createOrderApi } from '../api/orders';
@@ -54,9 +54,7 @@ export const Checkout = () => {
       const orderRes = await createOrderApi({ shippingAddress: address });
       const orderId = orderRes.data?._id;
       if (!orderId) throw new Error('Order could not be created');
-      const intentRes = await createPaymentIntentApi({ orderId });
-      if (!intentRes.data?.clientSecret) throw new Error('Stripe client secret missing');
-      setPayment({ orderId, clientSecret: intentRes.data.clientSecret });
+      setPayment({ orderId });
     } catch (err) {
       console.error('Order creation failed:', err);
       setErrorMsg(err.message || 'Order creation failed. Please check your shipping address.');
@@ -151,7 +149,7 @@ export const Checkout = () => {
                   <p className="text-xs text-slate-500">Simulate success or failure without card details</p>
                 </div>
               </div>
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+
             </div>
           </div>
         </div>
@@ -183,7 +181,7 @@ export const Checkout = () => {
           </div>
 
           <Button
-            disabled={Boolean(payment)}
+            disabled={Boolean(payment) || isSubmitting}
             type="submit"
             variant="primary"
             size="lg"
