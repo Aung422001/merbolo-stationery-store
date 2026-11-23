@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Apply npm advisory fixes to lockfile (one-time remediation)
-        if: github.sha == '51f3e55223cf6f2125e05163e689b91ba775ae2c'
+        if: github.event.head_commit.message == 'security: activate one-time dependency remediation'
         run: |
           npm audit fix --package-lock-only
           git config user.name "github-actions[bot]"
