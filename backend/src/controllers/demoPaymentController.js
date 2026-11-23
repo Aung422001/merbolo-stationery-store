@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
-import Cart from '../models/Cart.js';
 
 // Deliberately no card details or payment credentials. Demo-only state transition.
 export const confirmDemoPayment = async (req, res, next) => {
-  const { orderId, outcome } = req.body;
+  const { orderId, outcome } = req.body || {};
   if (!mongoose.isValidObjectId(orderId) || !['success', 'failure'].includes(outcome)) {
     return res.status(400).json({ success: false, message: 'Invalid demo request' });
   }
@@ -39,7 +38,7 @@ export const confirmDemoPayment = async (req, res, next) => {
       order.orderStatus = 'processing';
       order.demoOutcome = 'success';
       await order.save({ session });
-      // Do not erase a newer cart; cart remains available for the next demo.
+      // Do not clear the cart here: its contents may have changed after order creation.
       result = { code: 200, order };
     });
     if (result?.message) return res.status(result.code).json({ success: false, message: result.message });
