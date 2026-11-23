@@ -26,7 +26,7 @@ router.post(
   addItemToCart
 );
 
-router.put('/items/:productId', updateCartItemQuantity);
+router.put('/items/:productId', [body('quantity').isInt({ min: 0, max: 1000 }).withMessage('Quantity must be an integer between 0 and 1000'), validate], updateCartItemQuantity);
 router.delete('/items/:productId', removeCartItem);
 router.delete('/', clearUserCart);
 
