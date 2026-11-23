@@ -9,7 +9,7 @@ const sourceFiles = async dir => {
   const files = await Promise.all(entries.map(async entry => {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) return sourceFiles(full);
-    return /\\.(jsx?|tsx?)$/.test(entry.name) ? [full] : [];
+    return /\.(jsx?|tsx?)$/.test(entry.name) ? [full] : [];
   }));
   return files.flat();
 };
@@ -18,14 +18,14 @@ test('frontend contains no unsafe HTML injection or script execution sinks', asy
   const files = await sourceFiles(root.pathname);
   assert.ok(files.length > 0, 'frontend source files must be scanned');
   const banned = [
-    /dangerouslySetInnerHTML\\s*=/,
-    /\\.innerHTML\\s*=/,
-    /\\.outerHTML\\s*=/,
-    /\\binsertAdjacentHTML\\s*\\(/,
-    /\\bdocument\\.write\\s*\\(/,
-    /\\beval\\s*\\(/,
-    /\\bnew\\s+Function\\s*\\(/,
-    /\\bjavascript\\s*:/i
+    /dangerouslySetInnerHTML\s*=/,
+    /\.innerHTML\s*=/,
+    /\.outerHTML\s*=/,
+    /\binsertAdjacentHTML\s*\(/,
+    /\bdocument\.write\s*\(/,
+    /\beval\s*\(/,
+    /\bnew\s+Function\s*\(/,
+    /\bjavascript\s*:/i
   ];
   for (const file of files) {
     const source = await readFile(file, 'utf8');
