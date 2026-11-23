@@ -37,6 +37,9 @@ const orderSchema = new mongoose.Schema(
       default: 'pending'
     },
     paymentIntentId: { type: String, default: '' },
+    paymentProvider: { type: String, enum: ['demo', 'stripe'], default: 'demo' },
+    isDemo: { type: Boolean, default: true },
+    demoOutcome: { type: String, enum: ['success', 'failure', null], default: null },
     orderStatus: {
       type: String,
       enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
