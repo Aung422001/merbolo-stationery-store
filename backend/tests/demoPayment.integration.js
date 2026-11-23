@@ -5,6 +5,7 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import Order from '../src/models/Order.js';
 import Product from '../src/models/Product.js';
 import { confirmDemoPayment } from '../src/controllers/demoPaymentController.js';
+import { getOrderById } from '../src/controllers/orderController.js';
 
 const user = new mongoose.Types.ObjectId();
 const otherUser = new mongoose.Types.ObjectId();
@@ -55,6 +56,21 @@ test('real replica-set transaction integration', {timeout:120000}, async t=>{
     assert.equal((await pay(order._id)).statusCode,409);
     assert.equal((await Product.findById(product._id)).stock,1);
     assert.equal((await Order.findById(order._id)).paymentStatus,'pending');
+  });
+  await t.test('IDOR: foreign order reads are indistinguishable from nonexistent orders',async()=>{
+    const {create}=await fixture();
+    const order=await create(otherUser);
+    const read=async(id, role='customer')=>{
+      const res=response();
+      await getOrderById({params:{id:String(id)},user:{_id:user,role}},res,e=>{throw e});
+      return res;
+    };
+    const foreign=await read(order._id);
+    const missing=await read(new mongoose.Types.ObjectId());
+    assert.equal(foreign.statusCode,404);
+    assert.equal(missing.statusCode,404);
+    assert.equal(foreign.body.message,missing.body.message);
+    assert.equal(foreign.body.data,undefined);
   });
   await t.test('parallel orders never oversell the last unit',async()=>{
     const {product,create}=await fixture(1);
