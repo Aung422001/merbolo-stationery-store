@@ -2,102 +2,61 @@ import Stripe from 'stripe';
 import Cart from '../models/Cart.js';
 import Order from '../models/Order.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mockKey');
+const getStripe = () => {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    throw new Error('Stripe payment configuration is incomplete');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+};
 
 export const createPaymentIntent = async (req, res, next) => {
   try {
-    {
-      let totalAmount;
-      const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
-      if (!cart || cart.items.length === 0) {
-        return res.status(400).json({ success: false, message: 'Cart is empty' });
-      }
-
-      const subtotal = cart.items.reduce((sum, item) => {
-        return sum + (item.product ? item.product.price * item.quantity : 0);
-      }, 0);
-
-      const shippingFee = subtotal > 1000 ? 0 : 50;
-      totalAmount = subtotal + shippingFee;
+    const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
+    if (!cart?.items?.length) {
+      return res.status(400).json({ success: false, message: 'Cart is empty' });
     }
-
-    // Amount in Stripe for THB is in satang (1 THB = 100 satang)
-    const amountInSatang = Math.round(totalAmount * 100);
-
-    const isMockKey =
-      !process.env.STRIPE_SECRET_KEY ||
-      process.env.STRIPE_SECRET_KEY.includes('placeholder') ||
-      process.env.STRIPE_SECRET_KEY.includes('mock') ||
-      process.env.STRIPE_SECRET_KEY.startsWith('sk_test_51Mock');
-
-    if (isMockKey) {
-      return res.json({
-        success: true,
-        data: {
-          clientSecret: 'mock_client_secret_test_mode',
-          paymentIntentId: `pi_mock_${Date.now()}`,
-          amount: totalAmount
-        }
-      });
+    if (cart.items.some(item => !item.product?.isActive || !Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > item.product.stock)) {
+      return res.status(400).json({ success: false, message: 'Cart contains unavailable items or invalid quantities' });
     }
-
-    try {
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amountInSatang,
-        currency: 'thb',
-        metadata: { userId: req.user._id.toString() }
-      });
-
-      res.json({
-        success: true,
-        data: {
-          clientSecret: paymentIntent.client_secret,
-          paymentIntentId: paymentIntent.id,
-          amount: totalAmount
-        }
-      });
-    } catch (stripeErr) {
-      console.warn('Stripe API failed (falling back to mock payment):', stripeErr.message);
-      res.json({
-        success: true,
-        data: {
-          clientSecret: 'mock_client_secret_fallback',
-          paymentIntentId: `pi_fallback_${Date.now()}`,
-          amount: totalAmount
-        }
-      });
-    }
+    const subtotal = cart.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    const total = subtotal + (subtotal > 1000 ? 0 : 50);
+    const paymentIntent = await getStripe().paymentIntents.create({
+      amount: Math.round(total * 100),
+      currency: 'thb',
+      metadata: { userId: String(req.user._id) }
+    });
+    return res.json({ success: true, data: {
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: total
+    } });
   } catch (error) {
     next(error);
   }
 };
 
 export const handleStripeWebhook = async (req, res) => {
-  const sig = req.headers['stripe-signature'];
   let event;
-
   try {
-    if (process.env.STRIPE_WEBHOOK_SECRET && !process.env.STRIPE_WEBHOOK_SECRET.startsWith('whsec_mock')) {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } else {
-      return res.status(503).json({ success: false, message: 'Stripe webhook verification is not configured' });
+    if (!process.env.STRIPE_WEBHOOK_SECRET || !process.env.STRIPE_SECRET_KEY) {
+      return res.status(503).json({ success: false, message: 'Stripe webhook is not configured' });
     }
-  } catch (err) {
-    console.error(`Webhook Error: ${err.message}`);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object;
-    await Order.findOneAndUpdate(
-      { paymentIntentId: paymentIntent.id },
-      { paymentStatus: 'paid', orderStatus: 'processing' }
+    event = getStripe().webhooks.constructEvent(
+      req.body, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET
     );
+  } catch (error) {
+    return res.status(400).json({ success: false, message: 'Invalid Stripe webhook signature' });
   }
-
-  res.json({ received: true });
+  try {
+    if (event.type === 'payment_intent.succeeded') {
+      const intent = event.data.object;
+      await Order.findOneAndUpdate(
+        { paymentIntentId: intent.id, paymentStatus: 'pending', total: intent.amount_received / 100 },
+        { paymentStatus: 'paid', orderStatus: 'processing' }
+      );
+    }
+    return res.json({ received: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Webhook processing failed' });
+  }
 };
