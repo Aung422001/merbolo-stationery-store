@@ -3,14 +3,12 @@ import Category from '../models/Category.js';
 
 export const getProducts = async (req, res, next) => {
   try {
-    const { category, search, minPrice, maxPrice, sort, page = 1, limit = 12, isFeatured, includeInactive } = req.query;
+    const { category, search, minPrice, maxPrice, sort, page = 1, limit = 12, isFeatured } = req.query;
 
     const query = {};
 
-    // By default, only active products are shown on public storefront
-    if (!includeInactive || includeInactive !== 'true') {
-      query.isActive = true;
-    }
+    // Public storefront must never expose inactive inventory via query parameters.
+    query.isActive = true;
 
     if (isFeatured === 'true') {
       query.isFeatured = true;
@@ -81,9 +79,9 @@ export const getProductBySlug = async (req, res, next) => {
     
     let product;
     if (slug.match(/^[0-9a-fA-F]{24}$/)) {
-      product = await Product.findById(slug).populate('category', 'name slug');
+      product = await Product.findOne({ _id: slug, isActive: true }).populate('category', 'name slug');
     } else {
-      product = await Product.findOne({ slug }).populate('category', 'name slug');
+      product = await Product.findOne({ slug, isActive: true }).populate('category', 'name slug');
     }
 
     if (!product) {
