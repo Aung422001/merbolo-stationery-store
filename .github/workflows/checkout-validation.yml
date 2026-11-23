@@ -19,5 +19,7 @@ jobs:
       - name: Check backend JavaScript syntax
         run: |
           find backend/src -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Run backend demo payment tests
+        run: npm test --workspace=backend
       - name: Build frontend
         run: npm run build --workspace=frontend
