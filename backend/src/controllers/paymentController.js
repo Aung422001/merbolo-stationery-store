@@ -6,11 +6,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mockKey');
 
 export const createPaymentIntent = async (req, res, next) => {
   try {
-    const { amount } = req.body;
-
-    let totalAmount = amount;
-
-    if (!totalAmount) {
+    {
+      let totalAmount;
       const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
       if (!cart || cart.items.length === 0) {
         return res.status(400).json({ success: false, message: 'Cart is empty' });
@@ -87,7 +84,7 @@ export const handleStripeWebhook = async (req, res) => {
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } else {
-      event = req.body;
+      return res.status(503).json({ success: false, message: 'Stripe webhook verification is not configured' });
     }
   } catch (err) {
     console.error(`Webhook Error: ${err.message}`);
