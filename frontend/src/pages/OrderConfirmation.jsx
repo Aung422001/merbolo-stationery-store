@@ -45,9 +45,9 @@ export const OrderConfirmation = () => {
         <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
           <CheckCircle2 className="w-10 h-10" />
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900 font-serif">Thank You for Your Order!</h1>
+        <h1 className="text-3xl font-extrabold text-slate-900 font-serif">{order.paymentStatus === 'paid' ? 'Payment Confirmed' : 'Payment Pending'}</h1>
         <p className="text-sm text-slate-600 max-w-md mx-auto">
-          Your order has been confirmed and is being prepared for fulfillment.
+          {order.paymentStatus === 'paid' ? 'Your payment was verified and your order is being processed.' : 'Your order is awaiting verified payment. Do not assume your card was charged successfully.'}
         </p>
         <div className="inline-block bg-brand-50 border border-brand-200 px-4 py-2 rounded-xl text-xs font-mono font-bold text-brand-900">
           Order ID: #{order._id}
@@ -83,7 +83,7 @@ export const OrderConfirmation = () => {
             <span>{order.shippingFee === 0 ? 'FREE' : formatCurrency(order.shippingFee)}</span>
           </div>
           <div className="flex justify-between font-bold text-base text-slate-900 pt-2 border-t border-brand-100">
-            <span>Total Paid</span>
+            <span>{order.paymentStatus === 'paid' ? 'Total Paid' : 'Order Total'}</span>
             <span className="text-brand-900">{formatCurrency(order.total)}</span>
           </div>
         </div>
