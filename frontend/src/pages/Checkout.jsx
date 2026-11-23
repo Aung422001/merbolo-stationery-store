@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -8,6 +10,30 @@ import { createPaymentIntentApi } from '../api/payment';
 import { CartSummary } from '../components/cart/CartSummary';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) : null;
+
+const PaymentForm = ({ orderId, onError }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [busy, setBusy] = useState(false);
+  const pay = async (event) => {
+    event.preventDefault();
+    if (!stripe || !elements) return;
+    setBusy(true);
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: { return_url: window.location.origin + '/order-confirmation/' + orderId }
+    });
+    if (error) onError(error.message || 'Payment failed');
+    setBusy(false);
+  };
+  return <form onSubmit={pay} className="space-y-4">
+    <PaymentElement />
+    <Button type="submit" isLoading={busy} disabled={!stripe || busy}>Confirm secure payment</Button>
+  </form>;
+};
 
 export const Checkout = () => {
   const { user } = useAuthStore();
@@ -27,6 +53,7 @@ export const Checkout = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [payment, setPayment] = useState(null);
 
   const handleInputChange = (field, value) => {
     setAddress((prev) => ({ ...prev, [field]: value }));
@@ -38,19 +65,13 @@ export const Checkout = () => {
     setIsSubmitting(true);
 
     try {
-      // Payment confirmation must be completed before checkout can be enabled.
-      throw new Error('Secure card confirmation is not yet implemented. Checkout is temporarily disabled to protect orders.');
-
-      // 2. Create Order in DB
-      const orderRes = await createOrderApi({
-        shippingAddress: address,
-        paymentIntentId
-      });
-
-      // 3. Clear cart store & redirect to order confirmation
-      clearCart();
+      if (!stripePromise) throw new Error('Stripe publishable key is not configured');
+      const orderRes = await createOrderApi({ shippingAddress: address });
       const orderId = orderRes.data?._id;
-      navigate(`/order-confirmation/${orderId}`);
+      if (!orderId) throw new Error('Order could not be created');
+      const intentRes = await createPaymentIntentApi({ orderId });
+      if (!intentRes.data?.clientSecret) throw new Error('Stripe client secret missing');
+      setPayment({ orderId, clientSecret: intentRes.data.clientSecret });
     } catch (err) {
       console.error('Order creation failed:', err);
       setErrorMsg(err.message || 'Order creation failed. Please check your shipping address.');
@@ -59,7 +80,7 @@ export const Checkout = () => {
     }
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !payment) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
         <h2 className="text-xl font-bold text-slate-800">Your Cart is Empty</h2>
@@ -177,6 +198,7 @@ export const Checkout = () => {
           </div>
 
           <Button
+            disabled={Boolean(payment)}
             type="submit"
             variant="primary"
             size="lg"
@@ -192,6 +214,9 @@ export const Checkout = () => {
           </p>
         </div>
       </form>
+      {payment && stripePromise && <Elements stripe={stripePromise} options={{ clientSecret: payment.clientSecret }}>
+        <PaymentForm orderId={payment.orderId} onError={setErrorMsg} />
+      </Elements>}
     </div>
   );
 };
