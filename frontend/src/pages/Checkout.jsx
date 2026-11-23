@@ -11,7 +11,7 @@ import { Button } from '../components/ui/Button';
 
 export const Checkout = () => {
   const { user } = useAuthStore();
-  const { items, fetchCart } = useCartStore();
+  const { items, fetchCart, hasLoadedCart } = useCartStore();
   const navigate = useNavigate();
 
   const defaultAddress = user?.addresses?.find((a) => a.isDefault) || user?.addresses?.[0] || {};
@@ -65,6 +65,10 @@ export const Checkout = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (user && !hasLoadedCart && !payment) {
+    return <div role="status" className="max-w-7xl mx-auto px-4 py-16 text-center">Loading your cart…</div>;
+  }
 
   if (items.length === 0 && !payment) {
     return (
