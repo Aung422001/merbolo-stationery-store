@@ -30,19 +30,19 @@ app.use(
       if (
         origin === clientUrl ||
         origin === clientUrl.replace(/\/$/, '') ||
-        origin.includes('localhost') ||
-        origin.endsWith('.onrender.com') ||
-        origin.endsWith('.vercel.app')
+        origin === 'http://localhost:5173'
       ) {
         return callback(null, true);
       }
-      return callback(null, true);
+      return callback(new Error('Origin not allowed by CORS'));
     },
     credentials: true
   })
 );
 
 // Body parser
+// Stripe webhook needs the untouched request bytes for signature verification.
+app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -72,6 +72,9 @@ app.get('/api/health', (req, res) => {
 
 // One-click Database Seeder endpoint
 app.get('/api/seed', async (req, res, next) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return res.status(404).json({ success: false, message: 'Not found' });
+  }
   try {
     const result = await runSeed();
     res.status(200).json({
