@@ -49,8 +49,16 @@ app.use(express.urlencoded({ extended: true }));
 // Rate limiting on Auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per IP
+  max: 100, // overall auth traffic per IP
   message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' }
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts. Try again later.' }
 });
 
 // Root & Health check
@@ -88,6 +96,7 @@ app.get('/api/seed', async (req, res, next) => {
 });
 
 // API Routes
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
