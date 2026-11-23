@@ -127,6 +127,7 @@ export const updateOrderStatusAdmin = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
+    if (order.isDemo && ['shipped', 'delivered'].includes(orderStatus)) return res.status(409).json({ success: false, message: 'Demo orders cannot enter real shipping fulfillment' });
     if (orderStatus && order.paymentStatus !== 'paid' && ['processing', 'shipped', 'delivered'].includes(orderStatus)) return res.status(409).json({ success: false, message: 'Cannot fulfill an unpaid order' });
     if (orderStatus) order.orderStatus = orderStatus;
 
