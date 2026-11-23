@@ -14,6 +14,8 @@ test('checkout can simulate successful payment without Stripe', async ({ page })
     return json([]);
   });
   await page.goto('/checkout');
+  await expect(page).toHaveURL(/checkout/);
+  await expect(page.getByRole('heading',{name:'Checkout'})).toBeVisible({timeout:15000});
   await expect(page.getByText('Demo Payment — No Real Money')).toBeVisible();
   await page.getByLabel('Address Line 1').fill('Test street');
   await page.getByRole('button',{name:'Create Demo Order'}).click();
