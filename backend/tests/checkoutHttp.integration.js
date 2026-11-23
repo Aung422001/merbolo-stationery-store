@@ -42,7 +42,7 @@ test('HTTP checkout against real Express and isolated replica-set MongoDB', { ti
     assert.equal(created.status, 201);
     const id = created.data.data._id;
     await t.test('other users cannot view or finalize the order', async () => {
-      assert.equal((await request('GET', '/orders/' + id, null, otherToken)).status, 403);
+      assert.equal((await request('GET', '/orders/' + id, null, otherToken)).status, 404);
       assert.equal((await request('POST', '/payment/demo/confirm', { orderId: id, outcome: 'success' }, otherToken)).status, 404);
     });
     await t.test('success updates stock, persists paid status and rejects duplicate', async () => {
