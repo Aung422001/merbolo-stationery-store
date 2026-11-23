@@ -58,7 +58,9 @@ export const createOrder = async (req, res, next) => {
       shippingFee,
       total,
       paymentIntentId: '',
-      paymentStatus: 'pending'
+      paymentStatus: 'pending',
+      paymentProvider: 'demo',
+      isDemo: true
     });
 
     res.status(201).json({ success: true, data: order });
