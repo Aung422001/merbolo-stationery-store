@@ -29,3 +29,6 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Browser checkout E2E
         run: npm run test:e2e --workspace=frontend
+
+      - name: Browser checkout E2E against real Express and MongoDB
+        run: npx playwright test --config=playwright.real.config.js --workspace=frontend
