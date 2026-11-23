@@ -61,6 +61,15 @@ const loginLimiter = rateLimit({
   message: { success: false, message: 'Too many login attempts. Try again later.' }
 });
 
+// Limit automated account creation independently of the shared auth quota.
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many registration attempts. Try again later.' }
+});
+
 // Root & Health check
 app.get('/', (req, res) => {
   res.status(200).json({
@@ -97,6 +106,7 @@ app.get('/api/seed', async (req, res, next) => {
 
 // API Routes
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/register', registerLimiter);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
