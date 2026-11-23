@@ -1,38 +1,12 @@
 import React, { useState } from 'react';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import { CreditCard, Truck, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { createOrderApi } from '../api/orders';
-import { createPaymentIntentApi } from '../api/payment';
+import { confirmDemoPaymentApi } from '../api/payment';
 import { CartSummary } from '../components/cart/CartSummary';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
-
-const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) : null;
-
-const PaymentForm = ({ orderId, onError }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [busy, setBusy] = useState(false);
-  const pay = async (event) => {
-    event.preventDefault();
-    if (!stripe || !elements) return;
-    setBusy(true);
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: { return_url: window.location.origin + '/order-confirmation/' + orderId }
-    });
-    if (error) onError(error.message || 'Payment failed');
-    setBusy(false);
-  };
-  return <form onSubmit={pay} className="space-y-4">
-    <PaymentElement />
-    <Button type="submit" isLoading={busy} disabled={!stripe || busy}>Confirm secure payment</Button>
-  </form>;
-};
 
 export const Checkout = () => {
   const { user } = useAuthStore();
@@ -52,6 +26,20 @@ export const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [payment, setPayment] = useState(null);
+  const [demoBusy, setDemoBusy] = useState(false);
+  const [demoResult, setDemoResult] = useState(null);
+
+  const finishDemo = async (outcome) => {
+    if (!payment || demoBusy) return;
+    setDemoBusy(true);
+    setErrorMsg('');
+    try {
+      const response = await confirmDemoPaymentApi({ orderId: payment.orderId, outcome });
+      if (!response.success) throw new Error('Demo payment failed');
+      setDemoResult(outcome);
+    } catch (error) { setErrorMsg(error.message || 'Unable to finish demo payment'); }
+    finally { setDemoBusy(false); }
+  };
 
   const handleInputChange = (field, value) => {
     setAddress((prev) => ({ ...prev, [field]: value }));
@@ -63,7 +51,6 @@ export const Checkout = () => {
     setIsSubmitting(true);
 
     try {
-      if (!stripePromise) throw new Error('Stripe publishable key is not configured');
       const orderRes = await createOrderApi({ shippingAddress: address });
       const orderId = orderRes.data?._id;
       if (!orderId) throw new Error('Order could not be created');
@@ -91,7 +78,7 @@ export const Checkout = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <div className="border-b border-brand-100 pb-4">
         <h1 className="text-2xl font-bold text-slate-900 font-serif">Checkout</h1>
-        <p className="text-xs text-slate-500 mt-1">Shipping address & card payment</p>
+        <p className="text-xs text-slate-500 mt-1">Shipping address & simulated payment</p>
       </div>
 
       {errorMsg && (
@@ -160,8 +147,8 @@ export const Checkout = () => {
                   <CreditCard className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">Stripe Card Checkout (Test Mode)</p>
-                  <p className="text-xs text-slate-500">Card payment simulation for demo orders</p>
+                  <p className="text-sm font-semibold text-slate-800">Demo Payment — No Real Money</p>
+                  <p className="text-xs text-slate-500">Simulate success or failure without card details</p>
                 </div>
               </div>
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
@@ -203,18 +190,20 @@ export const Checkout = () => {
             isLoading={isSubmitting}
             className="w-full gap-2 text-base font-bold shadow-lg"
           >
-            Continue to Secure Payment
+            Create Demo Order
           </Button>
 
           <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5" />
-            Encrypted 256-bit Stripe security
+            Portfolio demonstration only — no real payment is collected
           </p>
         </div>
       </form>
-      {payment && stripePromise && <Elements stripe={stripePromise} options={{ clientSecret: payment.clientSecret }}>
-        <PaymentForm orderId={payment.orderId} onError={setErrorMsg} />
-      </Elements>}
+      {payment && <section className="bg-white rounded-2xl border border-brand-100 p-6 space-y-4" aria-label="Demo payment controls">
+        <h2 className="text-lg font-bold">Simulated Payment</h2>
+        <p className="text-sm text-slate-600">This is a portfolio demo. No real payment is processed and no card details are needed.</p>
+        {demoResult ? <div role="status" className="space-y-3"><p>{demoResult === 'success' ? 'Demo payment completed.' : 'Demo payment declined.'}</p><a className="text-brand-700 underline" href={'/order-confirmation/' + payment.orderId}>View Demo Order</a></div> : <div className="flex flex-wrap gap-3"><Button type="button" disabled={demoBusy} onClick={() => finishDemo('success')}>Simulate Success</Button><Button type="button" disabled={demoBusy} onClick={() => finishDemo('failure')}>Simulate Decline</Button></div>}
+      </section>}
     </div>
   );
 };
