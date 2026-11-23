@@ -20,6 +20,6 @@ test('checkout can simulate successful payment without Stripe', async ({ page })
   await expect(page.getByRole('button',{name:'Simulate Success'})).toBeVisible();
   await page.getByRole('button',{name:'Simulate Success'}).click();
   await expect(page.getByText('Demo payment completed.')).toBeVisible();
-  await page.getByRole('link',{name:'View Demo Order'}).click();
+  await page.getByRole('button',{name:'View Demo Order'}).click();
   await expect(page.getByRole('heading',{name:'Demo Payment Completed'})).toBeVisible();
 });
