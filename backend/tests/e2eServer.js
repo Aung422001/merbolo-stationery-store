@@ -4,6 +4,8 @@ import app from '../src/app.js';
 import Category from '../src/models/Category.js';
 import Product from '../src/models/Product.js';
 
+// Isolated CI-only secret: the real app must provide JWT_SECRET via its environment.
+process.env.JWT_SECRET = 'isolated-e2e-only-jwt-secret-not-for-production';
 const port = Number(process.env.PORT || 5000);
 const replset = await MongoMemoryReplSet.create({ replSet: { count: 1, storageEngine: 'wiredTiger' } });
 await mongoose.connect(replset.getUri());
