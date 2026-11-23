@@ -61,9 +61,6 @@ export const createOrder = async (req, res, next) => {
       paymentStatus: 'pending'
     });
 
-    // Clear user cart
-    await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
-
     res.status(201).json({ success: true, data: order });
   } catch (error) {
     next(error);
@@ -120,6 +117,7 @@ export const getAllOrdersAdmin = async (req, res, next) => {
 export const updateOrderStatusAdmin = async (req, res, next) => {
   try {
     const { orderStatus, paymentStatus } = req.body;
+    if (paymentStatus !== undefined) return res.status(403).json({ success: false, message: 'Payment status is managed by verified payment events' });
 
     const order = await Order.findById(req.params.id);
     if (!order) {
