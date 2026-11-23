@@ -31,4 +31,4 @@ jobs:
         run: npm run test:e2e --workspace=frontend
 
       - name: Browser checkout E2E against real Express and MongoDB
-        run: npx playwright test --config=playwright.real.config.js --workspace=frontend
+        run: npm exec --workspace=frontend -- playwright test --config=playwright.real.config.js
