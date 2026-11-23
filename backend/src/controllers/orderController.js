@@ -82,15 +82,15 @@ export const getMyOrders = async (req, res, next) => {
 
 export const getOrderById = async (req, res, next) => {
   try {
-    const order = await Order.findById(req.params.id).populate('user', 'name email');
+    // Enforce ownership in the database query to avoid leaking whether
+    // another customer's order ID exists (IDOR enumeration).
+    const filter = req.user.role === 'admin'
+      ? { _id: req.params.id }
+      : { _id: req.params.id, user: req.user._id };
+    const order = await Order.findOne(filter).populate('user', 'name email');
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
-    }
-
-    // Check if user is owner or admin
-    if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Not authorized to view this order' });
     }
 
     res.json({ success: true, data: order });
