@@ -13,6 +13,7 @@ export const createOrder = async (req, res, next) => {
       if (!cart || cart.items.length === 0) {
         return res.status(400).json({ success: false, message: 'Cart is empty' });
       }
+      if (cart.items.some((item) => !item.product)) return res.status(400).json({ success: false, message: 'Cart contains an unavailable product' });
       itemsToProcess = cart.items.map((item) => ({
         product: item.product._id,
         quantity: item.quantity
@@ -126,8 +127,8 @@ export const updateOrderStatusAdmin = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
+    if (orderStatus && order.paymentStatus !== 'paid' && ['processing', 'shipped', 'delivered'].includes(orderStatus)) return res.status(409).json({ success: false, message: 'Cannot fulfill an unpaid order' });
     if (orderStatus) order.orderStatus = orderStatus;
-    if (paymentStatus) order.paymentStatus = paymentStatus;
 
     const updatedOrder = await order.save();
     res.json({ success: true, data: updatedOrder });
