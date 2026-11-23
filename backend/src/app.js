@@ -19,26 +19,28 @@ const app = express();
 // Security headers
 app.use(helmet());
 
-// CORS
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like Postman or server-to-server)
-      if (!origin) return callback(null, true);
-      // Allow configured clientUrl, localhost, or any onrender.com subdomains
-      if (
-        origin === clientUrl ||
-        origin === clientUrl.replace(/\/$/, '') ||
-        origin === 'http://localhost:5173'
-      ) {
-        return callback(null, true);
-      }
-      return callback(new Error('Origin not allowed by CORS'));
-    },
-    credentials: true
-  })
-);
+// CORS: allow only the configured storefront origin. Local development is explicit.
+const normalizeOrigin = (value) => {
+  try {
+    const url = new URL(value);
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password ||
+        url.pathname !== '/' || url.search || url.hash) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+};
+const configuredOrigin = normalizeOrigin(process.env.CLIENT_URL || 'http://localhost:5173');
+if (!configuredOrigin) throw new Error('CLIENT_URL must be an HTTP(S) origin');
+const allowedOrigins = new Set([configuredOrigin]);
+if (process.env.NODE_ENV !== 'production') allowedOrigins.add('http://localhost:5173');
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, false);
+    return callback(null, allowedOrigins.has(origin));
+  },
+  credentials: true
+}));
 
 // Body parser
 // Stripe webhook needs the untouched request bytes for signature verification.
