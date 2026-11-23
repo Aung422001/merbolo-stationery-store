@@ -3,7 +3,6 @@ import { test, expect } from '@playwright/test';
 test('checkout can simulate successful payment without Stripe', async ({ page }) => {
   const orderId = '507f1f77bcf86cd799439011';
   await page.addInitScript(() => localStorage.setItem('merbolo_token','demo-token'));
-  await page.route('**/api/auth/me', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:{_id:'507f191e810c19729de860ea',name:'Demo User',email:'demo@example.com',role:'user'}})}));
   await page.route('**/api/**', async route => {
     const url = route.request().url(), method=route.request().method();
     const json = (data,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify({success:true,data})});
