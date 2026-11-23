@@ -21,6 +21,8 @@ jobs:
           find backend/src -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: Run backend demo payment tests
         run: npm test --workspace=backend
+      - name: Run MongoDB replica-set integration tests
+        run: npm run test:integration --workspace=backend
       - name: Build frontend
         run: npm run build --workspace=frontend
       - name: Install Chromium
