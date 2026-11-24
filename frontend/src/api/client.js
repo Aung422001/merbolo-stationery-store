@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { canRetryNetworkRequest } from './retryPolicy';
 import { useAuthStore } from '../store/authStore';
 
 const trimSlash = (url) => url.replace(/\/+$/, '');
@@ -92,10 +93,9 @@ client.interceptors.response.use(
   async (error) => {
     const { config } = error;
 
-    // Connection failed outright (server asleep, restarting or unreachable): retry with backoff (2s, 4s, 8s).
-    // Timeouts are not retried, since the server may already have processed the request.
+    // Retry read requests only; writes may have reached the server even when the client sees a network error.
     const retryCount = config?.__retryCount || 0;
-    if (error.code === 'ERR_NETWORK' && config && retryCount < MAX_NETWORK_RETRIES) {
+    if (canRetryNetworkRequest(error, MAX_NETWORK_RETRIES)) {
       config.__retryCount = retryCount + 1;
       await new Promise((resolve) => setTimeout(resolve, 2000 * 2 ** retryCount));
       return client(config);
