@@ -21,7 +21,22 @@ test('storefront account, catalog and cart lifecycle', async (t) => {
   t.after(() => new Promise((resolve, reject) => server.close(err => err ? reject(err) : resolve())));
   const base = 'http://127.0.0.1:' + server.address().port + '/api';
 
+  const timings = new Map();
+  const record = (label, duration) => {
+    const samples = timings.get(label) || [];
+    samples.push(duration);
+    timings.set(label, samples);
+  };
+  t.after(() => {
+    for (const [label, samples] of timings) {
+      const sorted = [...samples].sort((a, b) => a - b);
+      const percentile = p => sorted[Math.ceil(p * sorted.length) - 1].toFixed(2);
+      t.diagnostic(`PERF ${label}: n=${samples.length} p50=${percentile(0.5)}ms p95=${percentile(0.95)}ms max=${sorted.at(-1).toFixed(2)}ms`);
+    }
+  });
+
   async function request(method, path, { token, body, status = 200 } = {}) {
+    const started = performance.now();
     const response = await fetch(base + path, {
       method,
       headers: {
@@ -31,6 +46,8 @@ test('storefront account, catalog and cart lifecycle', async (t) => {
       ...(body ? { body: JSON.stringify(body) } : {})
     });
     const json = await response.json();
+    const route = path.split('?')[0].split('/').slice(0, 2).join('/');
+    record('HTTP ' + method + ' ' + route, performance.now() - started);
     assert.equal(response.status, status, method + ' ' + path + ': ' + json.message);
     return json.data;
   }
@@ -168,5 +185,39 @@ test('storefront account, catalog and cart lifecycle', async (t) => {
     await request('DELETE', '/categories/' + categoryId, { token: adminToken });
     const categories = await request('GET', '/categories');
     assert.equal(categories.length, 0);
+  });
+
+  await t.test('bounded catalog performance fixture', async () => {
+    const { default: Category } = await import('../src/models/Category.js');
+    const { default: Product } = await import('../src/models/Product.js');
+    const { getProducts } = await import('../src/controllers/productController.js');
+    const category = await Category.create({ name: 'Performance Fixture', slug: 'performance-fixture' });
+    await Product.insertMany(Array.from({ length: 200 }, (_, i) => ({
+      name: 'Fixture Notebook ' + i,
+      slug: 'fixture-notebook-' + i,
+      price: 50 + i,
+      category: category._id,
+      stock: 20,
+      isActive: true
+    })));
+    const catalogQuery = async (page) => {
+      const started = performance.now();
+      let result;
+      await getProducts(
+        { query: { category: category.slug, sort: 'price-asc', page: String(page), limit: '12' } },
+        { json: value => { result = value; } },
+        error => { throw error; }
+      );
+      assert.equal(result.success, true);
+      assert.equal(result.data.total, 200);
+      assert.equal(result.data.products.length, 12);
+      assert.equal(result.data.page, page);
+      assert.equal(result.data.products[0].price, 50 + (page - 1) * 12);
+      record('catalog controller (200 fixture products)', performance.now() - started);
+    };
+    // Fixed local fixtures; no external endpoints or configurable traffic generator.
+    for (let page = 1; page <= 12; page += 4) {
+      await Promise.all([page, page + 1, page + 2, page + 3].map(catalogQuery));
+    }
   });
 });
