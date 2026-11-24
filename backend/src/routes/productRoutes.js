@@ -3,6 +3,8 @@ import { body } from 'express-validator';
 import {
   getProducts,
   getProductBySlug,
+  getAdminProducts,
+  getAdminProduct,
   createProduct,
   updateProduct,
   deleteProduct
@@ -14,6 +16,8 @@ import { validate } from '../middleware/validate.js';
 const router = express.Router();
 
 router.get('/', getProducts);
+router.get('/admin/all', protect, admin, getAdminProducts);
+router.get('/admin/:slug', protect, admin, getAdminProduct);
 router.get('/:slug', getProductBySlug);
 
 router.post(
