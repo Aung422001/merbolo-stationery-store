@@ -3,8 +3,19 @@ import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 
 export const createOrder = async (req, res, next) => {
+  const { shippingAddress, checkoutRequestId } = req.body;
+  const hasRequestId = checkoutRequestId !== undefined;
+  if (hasRequestId && (typeof checkoutRequestId !== 'string' ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(checkoutRequestId))) {
+    return res.status(400).json({ success: false, message: 'Invalid checkout request ID' });
+  }
+  const checkoutFilter = { user: req.user._id, checkoutRequestId };
   try {
-    const { shippingAddress } = req.body;
+    if (hasRequestId) {
+      await Order.init();
+      const existing = await Order.findOne(checkoutFilter);
+      if (existing) return res.status(200).json({ success: true, data: existing });
+    }
 
     let itemsToProcess = [];
 
@@ -58,6 +69,7 @@ export const createOrder = async (req, res, next) => {
       subtotal,
       shippingFee,
       total,
+      ...(hasRequestId ? { checkoutRequestId } : {}),
       paymentIntentId: '',
       paymentStatus: 'pending',
       paymentProvider: 'demo',
@@ -66,6 +78,12 @@ export const createOrder = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: order });
   } catch (error) {
+    if (hasRequestId && error.code === 11000) {
+      try {
+        const existing = await Order.findOne(checkoutFilter);
+        if (existing) return res.status(200).json({ success: true, data: existing });
+      } catch (lookupError) { return next(lookupError); }
+    }
     next(error);
   }
 };
