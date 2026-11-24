@@ -1,5 +1,6 @@
 import './config/env.js';
 import express from 'express';
+import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -87,6 +88,13 @@ app.get('/api/health', (req, res) => {
     message: 'MerboloEbook API is healthy',
     timestamp: new Date().toISOString()
   });
+});
+
+// Liveness is intentionally separate from readiness; the latter must not
+// advertise an unavailable database as ready for customer requests.
+app.get('/api/ready', (req, res) => {
+  const ready = mongoose.connection.readyState === 1;
+  res.status(ready ? 200 : 503).json({ status: ready ? 'ready' : 'unavailable' });
 });
 
 // One-click Database Seeder endpoint
