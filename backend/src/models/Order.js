@@ -36,6 +36,7 @@ const orderSchema = new mongoose.Schema(
       enum: ['pending', 'paid', 'failed', 'refunded'],
       default: 'pending'
     },
+    checkoutRequestId: { type: String },
     paymentIntentId: { type: String, default: '' },
     paymentProvider: { type: String, enum: ['demo', 'stripe'], default: 'demo' },
     isDemo: { type: Boolean, default: true },
@@ -48,6 +49,13 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// A client checkout attempt may be retried without creating a second order.
+// Older orders without a request ID are deliberately excluded.
+orderSchema.index({ user: 1, checkoutRequestId: 1 }, {
+  unique: true,
+  partialFilterExpression: { checkoutRequestId: { $type: 'string' } }
+});
 
 const Order = mongoose.model('Order', orderSchema);
 export default Order;
