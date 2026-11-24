@@ -1,6 +1,9 @@
 import './config/env.js';
 import app from './app.js';
 import { connectDB } from './config/db.js';
+import { validateProductionConfig } from './config/productionConfig.js';
+
+validateProductionConfig();
 
 const PORT = process.env.PORT || 5000;
 
