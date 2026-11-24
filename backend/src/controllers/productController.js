@@ -1,14 +1,14 @@
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 
-export const getProducts = async (req, res, next) => {
+const listProducts = async (req, res, next, includeInactive = false) => {
   try {
     const { category, search, minPrice, maxPrice, sort, page = 1, limit = 12, isFeatured } = req.query;
 
     const query = {};
 
     // Public storefront must never expose inactive inventory via query parameters.
-    query.isActive = true;
+    if (!includeInactive) query.isActive = true;
 
     if (isFeatured === 'true') {
       query.isFeatured = true;
@@ -73,15 +73,19 @@ export const getProducts = async (req, res, next) => {
   }
 };
 
-export const getProductBySlug = async (req, res, next) => {
+export const getProducts = (req, res, next) => listProducts(req, res, next);
+export const getAdminProducts = (req, res, next) => listProducts(req, res, next, true);
+
+const findProduct = async (req, res, next, includeInactive = false) => {
   try {
     const { slug } = req.params;
     
+    const visibility = includeInactive ? {} : { isActive: true };
     let product;
     if (slug.match(/^[0-9a-fA-F]{24}$/)) {
-      product = await Product.findOne({ _id: slug, isActive: true }).populate('category', 'name slug');
+      product = await Product.findOne({ _id: slug, ...visibility }).populate('category', 'name slug');
     } else {
-      product = await Product.findOne({ slug, isActive: true }).populate('category', 'name slug');
+      product = await Product.findOne({ slug, ...visibility }).populate('category', 'name slug');
     }
 
     if (!product) {
@@ -93,6 +97,9 @@ export const getProductBySlug = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getProductBySlug = (req, res, next) => findProduct(req, res, next);
+export const getAdminProduct = (req, res, next) => findProduct(req, res, next, true);
 
 export const createProduct = async (req, res, next) => {
   try {
