@@ -6,7 +6,7 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { Spinner } from '../../components/ui/Spinner';
 import { getCategoriesApi } from '../../api/categories';
-import { getProductBySlugApi, createProductApi, updateProductApi } from '../../api/products';
+import { getAdminProductApi, createProductApi, updateProductApi } from '../../api/products';
 
 const emptyForm = {
   name: '',
@@ -49,7 +49,7 @@ export const AdminProductForm = () => {
     if (!isEditing) return;
     const fetchProduct = async () => {
       try {
-        const res = await getProductBySlugApi(id);
+        const res = await getAdminProductApi(id);
         const p = res.data;
         setForm({
           name: p.name || '',
