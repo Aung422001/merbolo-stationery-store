@@ -6,7 +6,7 @@ import { Spinner } from '../../components/ui/Spinner';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Button } from '../../components/ui/Button';
 import { formatCurrency } from '../../utils/formatCurrency';
-import { getProductsApi, deleteProductApi } from '../../api/products';
+import { getAdminProductsApi, deleteProductApi } from '../../api/products';
 
 export const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -16,7 +16,7 @@ export const AdminProducts = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await getProductsApi({ includeInactive: 'true', limit: 100 });
+      const res = await getAdminProductsApi({ limit: 100 });
       setProducts(res.data?.products || []);
     } catch (err) {
       console.error('Failed to load products:', err);
