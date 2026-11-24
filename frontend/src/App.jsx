@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { Compass } from 'lucide-react';
 
@@ -11,25 +11,29 @@ import { ProtectedRoute } from './components/ui/ProtectedRoute';
 import { Button } from './components/ui/Button';
 
 import { Home } from './pages/Home';
-import { Shop } from './pages/Shop';
-import { ProductDetail } from './pages/ProductDetail';
-import { Cart } from './pages/Cart';
-import { Checkout } from './pages/Checkout';
-import { OrderConfirmation } from './pages/OrderConfirmation';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
-import { Account } from './pages/Account';
+const Shop = lazy(() => import('./pages/Shop').then(module => ({ default: module.Shop })));
+const ProductDetail = lazy(() => import('./pages/ProductDetail').then(module => ({ default: module.ProductDetail })));
+const Cart = lazy(() => import('./pages/Cart').then(module => ({ default: module.Cart })));
+const Checkout = lazy(() => import('./pages/Checkout').then(module => ({ default: module.Checkout })));
+const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation').then(module => ({ default: module.OrderConfirmation })));
+const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
+const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })));
+const Account = lazy(() => import('./pages/Account').then(module => ({ default: module.Account })));
 
-import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { AdminProducts } from './pages/admin/AdminProducts';
-import { AdminProductForm } from './pages/admin/AdminProductForm';
-import { AdminCategories } from './pages/admin/AdminCategories';
-import { AdminOrders } from './pages/admin/AdminOrders';
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts').then(module => ({ default: module.AdminProducts })));
+const AdminProductForm = lazy(() => import('./pages/admin/AdminProductForm').then(module => ({ default: module.AdminProductForm })));
+const AdminCategories = lazy(() => import('./pages/admin/AdminCategories').then(module => ({ default: module.AdminCategories })));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders').then(module => ({ default: module.AdminOrders })));
+
+const PageLoading = () => (
+  <div role="status" className="max-w-7xl mx-auto px-4 py-16 text-center text-slate-500">Loading page…</div>
+);
 
 const StorefrontLayout = ({ children }) => (
   <div className="min-h-screen flex flex-col">
     <Navbar />
-    <main className="flex-1">{children}</main>
+    <main className="flex-1"><Suspense fallback={<PageLoading />}>{children}</Suspense></main>
     <Footer />
   </div>
 );
@@ -64,6 +68,7 @@ function App() {
   }, [isHydrated, isAuthenticated, fetchCart]);
 
   return (
+    <Suspense fallback={<PageLoading />}>
     <Routes>
       <Route path="/" element={<StorefrontLayout><Home /></StorefrontLayout>} />
       <Route path="/shop" element={<StorefrontLayout><Shop /></StorefrontLayout>} />
@@ -105,6 +110,7 @@ function App() {
 
       <Route path="*" element={<StorefrontLayout><NotFound /></StorefrontLayout>} />
     </Routes>
+    </Suspense>
   );
 }
 
