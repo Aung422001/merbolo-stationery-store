@@ -40,3 +40,6 @@ jobs:
 
       - name: Browser checkout E2E against real Express and MongoDB
         run: npm exec --workspace=frontend -- playwright test --config=playwright.real.config.js
+
+      - name: Smoke test isolated production build (staging rehearsal)
+        run: npm exec --workspace=frontend -- playwright test --config=playwright.staging.config.js
