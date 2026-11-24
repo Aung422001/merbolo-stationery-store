@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-// Deployed backend on Render, used when a production build has no valid VITE_API_URL
-const DEFAULT_PROD_API_URL = 'https://merbolo-stationery-store.onrender.com/api';
-
 const trimSlash = (url) => url.replace(/\/+$/, '');
 
 // Clean up VITE_API_URL as typed into a hosting dashboard: stray quotes/whitespace,
@@ -45,17 +42,10 @@ const getApiUrl = () => {
     return envUrl;
   }
 
-  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.onrender.com')) {
-    // If frontend is merbolo-stationery-store-1.onrender.com, backend is merbolo-stationery-store.onrender.com
-    const backendHost = window.location.hostname.replace(/-\d+\.onrender\.com$/, '.onrender.com');
-    return `https://${backendHost}/api`;
-  }
-
-  // Production build (e.g. on Vercel) without a usable VITE_API_URL: use the deployed Render backend
-  // rather than pointing visitors' browsers at their own localhost.
+  // Hosted builds never guess a live backend. A same-origin API is required
+  // unless this deployment explicitly configures VITE_API_URL.
   if (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
-    console.warn(`[api] VITE_API_URL is not set for this build; falling back to ${DEFAULT_PROD_API_URL}`);
-    return DEFAULT_PROD_API_URL;
+    return '/api';
   }
 
   return envUrl || 'http://localhost:5000/api';
