@@ -56,6 +56,12 @@ test('storefront account, catalog and cart lifecycle', async (t) => {
   const admin = { name: 'Regression Admin', email: 'admin@example.test', password: 'fixture-password-456' };
   let customerToken, adminToken, categoryId, productId;
 
+  await t.test('database-backed readiness returns ready', async () => {
+    const response = await fetch(base + '/ready');
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { status: 'ready' });
+  });
+
   await t.test('register, login and account profile', async () => {
     const registered = await request('POST', '/auth/register', { body: customer, status: 201 });
     assert.equal(registered.user.email, customer.email);
