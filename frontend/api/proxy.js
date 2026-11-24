@@ -2,9 +2,7 @@
 // The browser only ever talks to its own origin, so CORS and cross-site network errors can't happen,
 // and when the backend is down or misconfigured the user gets a specific error instead of "Network Error".
 //
-// The backend address is read at request time (no rebuild needed) from BACKEND_URL, falling back to VITE_API_URL.
-
-const DEFAULT_BACKEND_ORIGIN = 'https://merbolo-stationery-store.onrender.com';
+// Each deployed environment must explicitly configure its own BACKEND_URL.
 
 // Free-tier Render services can take ~50s to wake up; stay under the function's maxDuration (vercel.json)
 const UPSTREAM_TIMEOUT_MS = 55000;
@@ -14,18 +12,16 @@ const SKIP_REQUEST_HEADERS = new Set(['host', 'connection', 'content-length', 'a
 const SKIP_RESPONSE_HEADERS = new Set(['connection', 'content-length', 'content-encoding', 'transfer-encoding', 'keep-alive']);
 
 export const resolveBackendOrigin = (env = process.env) => {
-  for (const raw of [env.BACKEND_URL, env.VITE_API_URL]) {
-    if (!raw) continue;
-    let value = String(raw).trim().replace(/^['"]+|['"]+$/g, '').trim();
-    if (!value || value.startsWith('/') || value.includes('localhost')) continue;
-    if (!/^https?:\/\//i.test(value)) value = `https://${value}`;
-    try {
-      return new URL(value).origin;
-    } catch {
-      // Not a usable URL (e.g. a leftover "<your-backend>" placeholder): try the next source
-    }
+  const raw = env.BACKEND_URL;
+  if (typeof raw !== 'string' || !raw.trim()) return null;
+  try {
+    const url = new URL(raw.trim());
+    if (url.protocol !== 'https:' || url.username || url.password ||
+        url.pathname !== '/' || url.search || url.hash) return null;
+    return url.origin;
+  } catch {
+    return null;
   }
-  return DEFAULT_BACKEND_ORIGIN;
 };
 
 // Works whether the platform hands us the rewritten URL (/api/proxy?path=auth/register&x=1)
@@ -57,6 +53,7 @@ const sendJson = (res, status, message) => {
 
 export default async function handler(req, res) {
   const backendOrigin = resolveBackendOrigin();
+  if (!backendOrigin) return sendJson(res, 503, 'The shop backend is not configured for this environment.');
   const target = `${backendOrigin}${buildUpstreamPath(req.url)}`;
 
   const headers = {};
@@ -82,14 +79,14 @@ export default async function handler(req, res) {
       timedOut ? 504 : 502,
       timedOut
         ? 'The server is taking too long to respond (it may be waking up). Please try again in a minute.'
-        : `Cannot connect to the backend server (${backendOrigin}). Please try again later.`
+        : 'Cannot connect to the backend server. Please try again later.'
     );
   }
 
   // Render answers with this header when no service exists at the address
   if (upstream.status === 404 && (upstream.headers.get('x-render-routing') || '').includes('no-server')) {
     console.error(`[proxy] No Render service at ${backendOrigin} — set BACKEND_URL in Vercel`);
-    return sendJson(res, 502, `No backend server was found at ${backendOrigin}. The site's BACKEND_URL setting needs to be updated.`);
+    return sendJson(res, 502, 'The configured backend server is unavailable. Please try again later.');
   }
 
   const contentType = upstream.headers.get('content-type') || '';
