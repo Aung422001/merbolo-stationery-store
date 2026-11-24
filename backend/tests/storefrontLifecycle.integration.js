@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import mongoose from 'mongoose';
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
@@ -109,6 +110,54 @@ test('storefront account, catalog and cart lifecycle', async (t) => {
     assert.equal(order.shippingFee, 50);
     assert.equal(order.total, 350);
     assert.equal(order.paymentStatus, 'pending');
+    await request('DELETE', '/cart', { token: customerToken });
+  });
+
+  await t.test('checkout retry reuses the same order and decline permits a new attempt', async () => {
+    const shippingAddress = { line1: 'Test street', city: 'Chiang Mai', province: 'Chiang Mai', postalCode: '50000', country: 'TH' };
+    await request('POST', '/cart/items', { token: customerToken, body: { productId, quantity: 2 } });
+    const checkoutRequestId = randomUUID();
+    const create = (id, status) => request('POST', '/orders', {
+      token: customerToken, body: { shippingAddress, checkoutRequestId: id }, status
+    });
+    const before = await request('GET', '/orders', { token: customerToken });
+    const first = await create(checkoutRequestId, 201);
+    const retried = await create(checkoutRequestId, 200);
+    assert.equal(retried._id, first._id);
+    const after = await request('GET', '/orders', { token: customerToken });
+    assert.equal(after.length, before.length + 1);
+    const decline = await request('POST', '/payment/demo/confirm', {
+      token: customerToken, body: { orderId: first._id, outcome: 'failure' }
+    });
+    assert.equal(decline.paymentStatus, 'failed');
+    const stockAfterDecline = await request('GET', '/products/regression-notebook');
+    assert.equal(stockAfterDecline.stock, 12);
+
+    const next = await create(randomUUID(), 201);
+    assert.notEqual(next._id, first._id);
+    const paid = await request('POST', '/payment/demo/confirm', {
+      token: customerToken, body: { orderId: next._id, outcome: 'success' }
+    });
+    assert.equal(paid.paymentStatus, 'paid');
+    assert.equal(paid.demoOutcome, 'success');
+    assert.equal(paid.isDemo, true);
+    const persistedOrder = await request('GET', '/orders/' + next._id, { token: customerToken });
+    assert.equal(persistedOrder.orderStatus, 'processing');
+    assert.equal(persistedOrder.total, 350);
+    const stockAfterPayment = await request('GET', '/products/regression-notebook');
+    assert.equal(stockAfterPayment.stock, 10);
+    await request('DELETE', '/cart', { token: customerToken });
+  });
+
+  await t.test('checkout applies free shipping above the threshold', async () => {
+    await request('POST', '/cart/items', { token: customerToken, body: { productId, quantity: 7 } });
+    const order = await request('POST', '/orders', { token: customerToken, status: 201, body: {
+      checkoutRequestId: randomUUID(),
+      shippingAddress: { line1: 'Test street', city: 'Chiang Mai', province: 'Chiang Mai', postalCode: '50000', country: 'TH' }
+    } });
+    assert.equal(order.subtotal, 1050);
+    assert.equal(order.shippingFee, 0);
+    assert.equal(order.total, 1050);
     await request('DELETE', '/cart', { token: customerToken });
   });
 
