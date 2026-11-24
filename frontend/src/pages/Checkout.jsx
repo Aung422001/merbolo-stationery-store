@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { CreditCard, Truck, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
@@ -26,6 +26,8 @@ export const Checkout = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const checkoutRequestId = useRef(null);
+  const submitting = useRef(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [payment, setPayment] = useState(null);
   const [demoBusy, setDemoBusy] = useState(false);
@@ -50,11 +52,14 @@ export const Checkout = () => {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
+    if (submitting.current || payment) return;
+    submitting.current = true;
     setErrorMsg('');
     setIsSubmitting(true);
 
     try {
-      const orderRes = await createOrderApi({ shippingAddress: address });
+      checkoutRequestId.current ||= crypto.randomUUID();
+      const orderRes = await createOrderApi({ shippingAddress: address, checkoutRequestId: checkoutRequestId.current });
       const orderId = orderRes.data?._id;
       if (!orderId) throw new Error('Order could not be created');
       setPayment({ orderId });
@@ -62,6 +67,7 @@ export const Checkout = () => {
       console.error('Order creation failed:', err);
       setErrorMsg(err.message || 'Order creation failed. Please check your shipping address.');
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   };
@@ -207,7 +213,7 @@ export const Checkout = () => {
       {payment && <section className="bg-white rounded-2xl border border-brand-100 p-6 space-y-4" aria-label="Demo payment controls">
         <h2 className="text-lg font-bold">Simulated Payment</h2>
         <p className="text-sm text-slate-600">This is a portfolio demo. No real payment is processed and no card details are needed.</p>
-        {demoResult ? <div role="status" className="space-y-3"><p>{demoResult === 'success' ? 'Demo payment completed.' : 'Demo payment declined.'}</p><button type="button" className="text-brand-700 underline" onClick={() => navigate('/order-confirmation/' + payment.orderId)}>View Demo Order</button>{demoResult === 'failure' && <button type="button" className="ml-4 text-brand-700 underline" onClick={() => { setPayment(null); setDemoResult(null); }}>Try a New Demo Order</button>}</div> : <div className="flex flex-wrap gap-3"><Button type="button" disabled={demoBusy} onClick={() => finishDemo('success')}>Simulate Success</Button><Button type="button" disabled={demoBusy} onClick={() => finishDemo('failure')}>Simulate Decline</Button></div>}
+        {demoResult ? <div role="status" className="space-y-3"><p>{demoResult === 'success' ? 'Demo payment completed.' : 'Demo payment declined.'}</p><button type="button" className="text-brand-700 underline" onClick={() => navigate('/order-confirmation/' + payment.orderId)}>View Demo Order</button>{demoResult === 'failure' && <button type="button" className="ml-4 text-brand-700 underline" onClick={() => { checkoutRequestId.current = null; setPayment(null); setDemoResult(null); }}>Try a New Demo Order</button>}</div> : <div className="flex flex-wrap gap-3"><Button type="button" disabled={demoBusy} onClick={() => finishDemo('success')}>Simulate Success</Button><Button type="button" disabled={demoBusy} onClick={() => finishDemo('failure')}>Simulate Decline</Button></div>}
       </section>}
     </div>
   );
