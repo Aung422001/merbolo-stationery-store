@@ -16,6 +16,10 @@ This checklist applies to `fix/security-checkout-audit`. Do not merge or deploy 
 
 Do not commit real environment values. Only public client configuration may be exposed through Vite's `VITE_` variables. Use hosting-provider secret settings for server credentials. No production database or payment credentials should be copied into staging.
 
+## CI staging rehearsal
+
+The branch workflow builds the production frontend and runs the real checkout browser suite against a loopback-only Express backend with a disposable MongoDB replica set. Run `npm exec --workspace=frontend -- playwright test --config=playwright.staging.config.js` after dependency and Chromium installation. This is an isolated rehearsal, not a hosted staging deployment. A remote staging API and dedicated database are still required before the hosted smoke check.
+
 ## Before staging
 
 - Verify the Vercel project is the correct Merbolo project, not another storefront or portfolio.
