@@ -106,6 +106,18 @@ test('storefront account, catalog and cart lifecycle', async (t) => {
     assert.equal(catalog.products[0]._id, productId);
   });
 
+  await t.test('admin can manage hidden products and restore storefront availability', async () => {
+    const hidden = await request('PUT', '/products/' + productId, { token: adminToken, body: { isActive: false } });
+    assert.equal(hidden.isActive, false);
+    const adminList = await request('GET', '/products/admin/all', { token: adminToken });
+    assert.ok(adminList.products.some(product => product._id === productId && product.isActive === false));
+    const adminDetail = await request('GET', '/products/admin/' + productId, { token: adminToken });
+    assert.equal(adminDetail.isActive, false);
+    await request('PUT', '/products/' + productId, { token: adminToken, body: { isActive: true } });
+    const restored = await request('GET', '/products/regression-notebook');
+    assert.equal(restored.isActive, true);
+  });
+
   await t.test('cart add, update, current-price totals and remove', async () => {
     const empty = await request('GET', '/cart', { token: customerToken });
     assert.equal(empty.items.length, 0);
