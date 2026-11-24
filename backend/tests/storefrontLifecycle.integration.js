@@ -98,6 +98,20 @@ test('storefront account, catalog and cart lifecycle', async (t) => {
     assert.equal(removed.items.length, 0);
   });
 
+  await t.test('checkout uses the current catalog price and shipping fee', async () => {
+    await request('POST', '/cart/items', { token: customerToken, body: { productId, quantity: 2 } });
+    await request('PUT', '/products/' + productId, { token: adminToken, body: { price: 150 } });
+    const order = await request('POST', '/orders', { token: customerToken, status: 201, body: {
+      shippingAddress: { line1: 'Test street', city: 'Chiang Mai', province: 'Chiang Mai', postalCode: '50000', country: 'TH' }
+    } });
+    assert.equal(order.items[0].price, 150);
+    assert.equal(order.subtotal, 300);
+    assert.equal(order.shippingFee, 50);
+    assert.equal(order.total, 350);
+    assert.equal(order.paymentStatus, 'pending');
+    await request('DELETE', '/cart', { token: customerToken });
+  });
+
   await t.test('catalog cleanup through admin CRUD', async () => {
     await request('DELETE', '/products/' + productId, { token: adminToken });
     const catalog = await request('GET', '/products');
