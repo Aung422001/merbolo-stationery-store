@@ -29,6 +29,8 @@ jobs:
         run: npm test --workspace=backend
       - name: Run MongoDB replica-set integration tests
         run: npm run test:integration --workspace=backend
+      - name: Bounded catalog performance and load smoke test
+        run: node --test backend/tests/catalogPerformance.perf.js
       - name: Check frontend XSS safety regression
         run: node --test frontend/tests/xssSafety.test.js
       - name: Build frontend
