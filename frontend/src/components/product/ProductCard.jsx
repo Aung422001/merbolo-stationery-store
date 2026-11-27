@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -12,6 +13,7 @@ export const ProductCard = ({ product }) => {
   );
   const quantityInCart = cartItem?.quantity || 0;
 
+  const [imageFailed, setImageFailed] = useState(false);
   const isOutOfStock = product.stock <= 0;
   const image = product.images?.[0] || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
 
@@ -38,12 +40,19 @@ export const ProductCard = ({ product }) => {
     <div className="group bg-white rounded-2xl border border-brand-100/80 overflow-hidden shadow-sm hover-lift flex flex-col h-full animate-scale-in">
       {/* Image container */}
       <Link to={`/product/${product.slug}`} className="relative aspect-square overflow-hidden bg-brand-50 block">
-        <img
-          src={image}
-          alt={product.name}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-        />
+        {imageFailed ? (
+          <div className="w-full h-full flex items-center justify-center p-4 text-center text-xs font-medium text-slate-500 bg-brand-50" role="img" aria-label={`${product.name} image unavailable`}>
+            Image unavailable
+          </div>
+        ) : (
+          <img
+            src={image}
+            alt={product.name}
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+        )
         {product.category?.name && (
           <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-[11px] font-semibold text-brand-800 px-2.5 py-1 rounded-full shadow-sm">
             {product.category.name}
@@ -59,7 +68,7 @@ export const ProductCard = ({ product }) => {
       </Link>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+      <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between gap-3 min-w-0">
         <div>
           <Link to={`/product/${product.slug}`}>
             <h3 className="font-semibold text-slate-800 text-sm hover:text-brand-700 line-clamp-2 transition-colors">
@@ -72,8 +81,8 @@ export const ProductCard = ({ product }) => {
         </div>
 
         {/* Pricing & Add to Cart */}
-        <div className="pt-2 border-t border-brand-50 flex items-center justify-between mt-auto">
-          <div className="flex items-baseline gap-2">
+        <div className="pt-2 border-t border-brand-50 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mt-auto min-w-0">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 min-w-0">
             <span className="text-base font-bold text-brand-900">
               {formatCurrency(product.price)}
             </span>
@@ -85,7 +94,7 @@ export const ProductCard = ({ product }) => {
           </div>
 
           {quantityInCart > 0 ? (
-            <div className="flex items-center gap-1.5 bg-brand-50 border border-brand-200 rounded-lg px-1 py-1">
+            <div className="flex items-center self-end shrink-0 gap-1.5 bg-brand-50 border border-brand-200 rounded-lg px-1 py-1">
               <button
                 onClick={handleDecrease}
                 className="w-6 h-6 rounded-md hover:bg-brand-200 flex items-center justify-center text-slate-700 transition-colors cursor-pointer"
@@ -111,7 +120,7 @@ export const ProductCard = ({ product }) => {
               variant="primary"
               disabled={isOutOfStock}
               onClick={handleAddToCart}
-              className="!px-3"
+              className="!px-3 self-end shrink-0"
               title="Add to cart"
             >
               <ShoppingCart className="w-4 h-4" />
