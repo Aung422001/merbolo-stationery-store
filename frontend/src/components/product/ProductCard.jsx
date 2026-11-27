@@ -34,7 +34,7 @@ export const ProductCard = ({ product }) => {
   const handleDecrease = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isCartLoading) return;
+    if (isCartLoading || quantityInCart <= 1) return;
     updateQuantity(product._id || product.id, quantityInCart - 1);
   };
 
@@ -99,8 +99,8 @@ export const ProductCard = ({ product }) => {
             <div className="flex items-center self-end shrink-0 gap-1.5 bg-brand-50 border border-brand-200 rounded-lg px-1 py-1">
               <button
                 onClick={handleDecrease}
-                disabled={isCartLoading}
-                className="w-6 h-6 rounded-md hover:bg-brand-200 flex items-center justify-center text-slate-700 transition-colors cursor-pointer"
+                disabled={isCartLoading || quantityInCart <= 1}
+                className="w-6 h-6 rounded-md hover:bg-brand-200 flex items-center justify-center text-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 title="Decrease quantity"
               >
                 <Minus className="w-3.5 h-3.5" />
