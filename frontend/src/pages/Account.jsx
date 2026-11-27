@@ -109,6 +109,7 @@ export const Account = () => {
                       {order.orderStatus}
                     </span>
                     <p className="font-bold text-slate-900 text-sm">{formatCurrency(order.total)}</p>
+                    <span className="text-xs font-semibold text-brand-700 whitespace-nowrap">Track Order</span>
                     <ArrowRight className="w-4 h-4 text-slate-400" />
                   </div>
                 </Link>
