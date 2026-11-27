@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 export const ProductCard = ({ product }) => {
   const addItem = useCartStore((state) => state.addItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const isCartLoading = useCartStore((state) => state.isLoading);
   const cartItem = useCartStore((state) =>
     state.items.find((i) => i.productId === (product._id || product.id))
   );
@@ -26,13 +27,14 @@ export const ProductCard = ({ product }) => {
   const handleIncrease = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (quantityInCart >= product.stock) return;
+    if (isCartLoading || quantityInCart >= product.stock) return;
     updateQuantity(product._id || product.id, quantityInCart + 1);
   };
 
   const handleDecrease = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isCartLoading) return;
     updateQuantity(product._id || product.id, quantityInCart - 1);
   };
 
@@ -97,6 +99,7 @@ export const ProductCard = ({ product }) => {
             <div className="flex items-center self-end shrink-0 gap-1.5 bg-brand-50 border border-brand-200 rounded-lg px-1 py-1">
               <button
                 onClick={handleDecrease}
+                disabled={isCartLoading}
                 className="w-6 h-6 rounded-md hover:bg-brand-200 flex items-center justify-center text-slate-700 transition-colors cursor-pointer"
                 title="Decrease quantity"
               >
@@ -107,7 +110,7 @@ export const ProductCard = ({ product }) => {
               </span>
               <button
                 onClick={handleIncrease}
-                disabled={quantityInCart >= product.stock}
+                disabled={isCartLoading || quantityInCart >= product.stock}
                 className="w-6 h-6 rounded-md hover:bg-brand-200 flex items-center justify-center text-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 title="Increase quantity"
               >
@@ -118,7 +121,7 @@ export const ProductCard = ({ product }) => {
             <Button
               size="sm"
               variant="primary"
-              disabled={isOutOfStock}
+              disabled={isOutOfStock || isCartLoading}
               onClick={handleAddToCart}
               className="!px-3 self-end shrink-0"
               title="Add to cart"
