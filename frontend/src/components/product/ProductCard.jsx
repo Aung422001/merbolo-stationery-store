@@ -52,7 +52,7 @@ export const ProductCard = ({ product }) => {
             loading="lazy"
             onError={() => setImageFailed(true)}
           />
-        )
+        )}
         {product.category?.name && (
           <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-[11px] font-semibold text-brand-800 px-2.5 py-1 rounded-full shadow-sm">
             {product.category.name}
