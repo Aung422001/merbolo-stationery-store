@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle2, PackageCheck, ShoppingBag, ArrowRight } from 'lucide-react';
+import { CheckCircle2, PackageCheck, ShoppingBag, ArrowRight, Clock3, Truck, MapPin, XCircle } from 'lucide-react';
 import { getOrderByIdApi } from '../api/orders';
 import { formatCurrency } from '../utils/formatCurrency';
 import { Spinner } from '../components/ui/Spinner';
@@ -26,6 +26,14 @@ export const OrderConfirmation = () => {
 
   const isDemo = order?.isDemo === true;
   const isPaid = order?.paymentStatus === 'paid';
+  const stages = [
+    { key: 'pending', title: 'Order Placed', icon: Clock3 },
+    { key: 'processing', title: 'Processing', icon: PackageCheck },
+    { key: 'shipped', title: 'Shipped', icon: Truck },
+    { key: 'delivered', title: 'Delivered', icon: MapPin }
+  ];
+  const currentStage = stages.findIndex((stage) => stage.key === order?.orderStatus);
+  const stopped = order?.orderStatus === 'cancelled' || order?.paymentStatus === 'failed';
 
   if (loading) {
     return <Spinner size="lg" className="min-h-[60vh]" />;
@@ -56,6 +64,42 @@ export const OrderConfirmation = () => {
           Order ID: #{order._id}
         </div>
       </div>
+
+      <section aria-label="Order tracking" className="bg-white p-6 sm:p-8 rounded-2xl border border-brand-100 shadow-sm space-y-5">
+        <div className="flex flex-wrap justify-between items-center gap-2">
+          <h2 className="text-lg font-bold text-slate-900">Track Your Order</h2>
+          <span className="rounded-full bg-brand-50 text-brand-900 px-3 py-1 text-xs font-semibold capitalize">{order.orderStatus}</span>
+        </div>
+        {isDemo && <p className="text-xs rounded-lg bg-amber-50 border border-amber-200 p-3 text-amber-900">Demo tracking only — no real parcel is shipped.</p>}
+        {stopped ? (
+          <div role="status" className="flex gap-3 rounded-xl bg-rose-50 p-4 text-rose-800">
+            <XCircle className="w-5 h-5 shrink-0" />
+            <p className="text-sm font-semibold">{order.orderStatus === 'cancelled' ? 'Order Cancelled' : 'Payment Declined'}</p>
+          </div>
+        ) : (
+          <ol className="space-y-0">
+            {stages.map((stage, index) => {
+              const completed = index <= currentStage;
+              const Icon = stage.icon;
+              return (
+                <li key={stage.key} className="flex gap-3 min-h-20">
+                  <div className="flex flex-col items-center">
+                    <div className={'w-9 h-9 rounded-full flex items-center justify-center shrink-0 ' + (completed ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400')}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    {index < stages.length - 1 && <div className={'w-0.5 flex-1 my-1 ' + (index < currentStage ? 'bg-emerald-500' : 'bg-slate-200')} />}
+                  </div>
+                  <div className="pb-5 pt-1">
+                    <p className={'text-sm font-semibold ' + (completed ? 'text-slate-900' : 'text-slate-400')}>{stage.title}{index === currentStage ? ' · Current' : ''}</p>
+                    <p className="text-xs text-slate-500 mt-1">{completed ? 'Stage reached' : 'Not yet reached'}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+        <p className="text-xs text-slate-500">Placed {new Date(order.createdAt).toLocaleString('en-GB')}. Refresh to see the latest status.</p>
+      </section>
 
       {/* Order Details Card */}
       <div className="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm space-y-6">
