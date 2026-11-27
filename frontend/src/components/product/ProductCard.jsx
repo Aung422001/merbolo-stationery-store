@@ -34,7 +34,7 @@ export const ProductCard = ({ product }) => {
   const handleDecrease = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isCartLoading || quantityInCart <= 1) return;
+    if (isCartLoading || quantityInCart <= 0) return;
     updateQuantity(product._id || product.id, quantityInCart - 1);
   };
 
@@ -43,8 +43,16 @@ export const ProductCard = ({ product }) => {
       {/* Image container */}
       <Link to={`/product/${product.slug}`} className="relative aspect-square overflow-hidden bg-brand-50 block">
         {imageFailed ? (
-          <div className="w-full h-full flex items-center justify-center p-4 text-center text-xs font-medium text-slate-500 bg-brand-50" role="img" aria-label={`${product.name} image unavailable`}>
-            Image unavailable
+          <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-xs font-medium text-slate-500 bg-brand-50" role="img" aria-label={`${product.name} image unavailable`}>
+            <svg viewBox="0 0 180 180" className="w-24 h-24 max-w-full" role="presentation" aria-hidden="true">
+              <g transform="rotate(-35 90 90)">
+                <rect x="74" y="22" width="32" height="88" rx="9" fill="#a6c8df" stroke="#597b94" strokeWidth="2" />
+                <rect x="78" y="96" width="24" height="37" rx="4" fill="#f5f5f0" stroke="#597b94" strokeWidth="2" />
+                <path d="M78 133 L90 163 L102 133 Z" fill="#d8dce2" stroke="#597b94" strokeWidth="2" />
+                <path d="M90 145 L90 163" stroke="#597b94" strokeWidth="2" />
+              </g>
+            </svg>
+            <span className="sr-only">Illustration shown because the product photo is unavailable</span>
           </div>
         ) : (
           <img
@@ -99,7 +107,7 @@ export const ProductCard = ({ product }) => {
             <div className="flex items-center self-end shrink-0 gap-1.5 bg-brand-50 border border-brand-200 rounded-lg px-1 py-1">
               <button
                 onClick={handleDecrease}
-                disabled={isCartLoading || quantityInCart <= 1}
+                disabled={isCartLoading}
                 className="w-6 h-6 rounded-md hover:bg-brand-200 flex items-center justify-center text-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 title="Decrease quantity"
               >
