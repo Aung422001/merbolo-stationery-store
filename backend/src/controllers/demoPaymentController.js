@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
+import Cart from '../models/Cart.js';
 
 // Deliberately no card details or payment credentials. Demo-only state transition.
 export const confirmDemoPayment = async (req, res, next) => {
@@ -38,7 +39,17 @@ export const confirmDemoPayment = async (req, res, next) => {
       order.orderStatus = 'processing';
       order.demoOutcome = 'success';
       await order.save({ session });
-      // Do not clear the cart here: its contents may have changed after order creation.
+      // Remove only quantities purchased by this order; preserve any items added later.
+      const cart = await Cart.findOne({ user: order.user }).session(session);
+      if (cart) {
+        for (const purchased of order.items) {
+          const cartItem = cart.items.find((item) => String(item.product) === String(purchased.product));
+          if (!cartItem) continue;
+          cartItem.quantity = Math.max(0, cartItem.quantity - purchased.quantity);
+        }
+        cart.items = cart.items.filter((item) => item.quantity > 0);
+        await cart.save({ session });
+      }
       result = { code: 200, order };
     });
     if (result?.message) return res.status(result.code).json({ success: false, message: result.message });
