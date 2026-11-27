@@ -91,19 +91,13 @@ export const useCartStore = create((set, get) => ({
         set({ isLoading: false });
       }
     } else {
-      const currentItems = [...get().items];
-      const existingIndex = currentItems.findIndex((i) => i.productId === productId);
-
-      if (existingIndex > -1) {
-        currentItems[existingIndex].quantity += quantity;
-      } else {
-        currentItems.push({
-          productId,
-          product,
-          quantity,
-          price: product.price
-        });
-      }
+      const existingItems = get().items;
+      const existingIndex = existingItems.findIndex((i) => i.productId === productId);
+      const currentItems = existingIndex > -1
+        ? existingItems.map((item, index) => index === existingIndex
+          ? { ...item, quantity: item.quantity + quantity }
+          : item)
+        : [...existingItems, { productId, product, quantity, price: product.price }];
 
       saveGuestCart(currentItems);
       set({ items: currentItems });
@@ -123,15 +117,11 @@ export const useCartStore = create((set, get) => ({
         set({ isLoading: false });
       }
     } else {
-      let currentItems = [...get().items];
-      if (quantity <= 0) {
-        currentItems = currentItems.filter((i) => i.productId !== productId);
-      } else {
-        const index = currentItems.findIndex((i) => i.productId === productId);
-        if (index > -1) {
-          currentItems[index].quantity = quantity;
-        }
-      }
+      const currentItems = quantity <= 0
+        ? get().items.filter((item) => item.productId !== productId)
+        : get().items.map((item) => item.productId === productId
+          ? { ...item, quantity }
+          : item);
       saveGuestCart(currentItems);
       set({ items: currentItems });
     }
