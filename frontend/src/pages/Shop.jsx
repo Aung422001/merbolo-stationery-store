@@ -19,6 +19,8 @@ export const Shop = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
 
   // Filters State
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
@@ -53,6 +55,7 @@ export const Shop = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
+      setLoadError('');
       try {
         const res = await getProductsApi({
           category: selectedCategory,
@@ -68,13 +71,15 @@ export const Shop = () => {
         setTotalPages(res.data?.pages || 1);
       } catch (err) {
         console.error('Failed to fetch products:', err);
+        setProducts([]);
+        setLoadError(err.response?.data?.message || 'Products could not be loaded. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [selectedCategory, debouncedSearch, debouncedMinPrice, debouncedMaxPrice, sort, page]);
+  }, [selectedCategory, debouncedSearch, debouncedMinPrice, debouncedMaxPrice, sort, page, retryKey]);
 
   const handleResetFilters = () => {
     setSelectedCategory('');
@@ -118,7 +123,13 @@ export const Shop = () => {
 
       {/* Products Grid Area (Full Width) */}
       <main className="space-y-8">
-        <ProductGrid products={products} isLoading={loading} />
+        {loadError && !loading ? (
+          <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center text-slate-800">
+            <p className="font-semibold">Unable to load products</p>
+            <p className="mt-2 text-sm">{loadError}</p>
+            <button type="button" onClick={() => setRetryKey((value) => value + 1)} className="mt-4 rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white">Retry loading products</button>
+          </div>
+        ) : <ProductGrid products={products} isLoading={loading} />}
 
         {/* Pagination */}
         {totalPages > 1 && (
