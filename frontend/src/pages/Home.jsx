@@ -22,13 +22,22 @@ export const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prodRes, catRes] = await Promise.all([
+        const [productsResult, categoriesResult] = await Promise.allSettled([
           getProductsApi({ isFeatured: 'true', limit: 8 }),
           getCategoriesApi()
         ]);
-        setFeaturedProducts(prodRes.data?.products || []);
-        setProductLoadError(false);
-        setCategories(catRes.data || []);
+        if (productsResult.status === 'fulfilled') {
+          setFeaturedProducts(productsResult.value.data?.products || []);
+          setProductLoadError(false);
+        } else {
+          console.error('Failed to load featured products:', productsResult.reason);
+          setProductLoadError(true);
+        }
+        if (categoriesResult.status === 'fulfilled') {
+          setCategories(categoriesResult.value.data || []);
+        } else {
+          console.error('Failed to load categories:', categoriesResult.reason);
+        }
       } catch (err) {
         console.error('Failed to load home page data:', err);
         setProductLoadError(true);
