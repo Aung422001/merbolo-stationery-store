@@ -59,7 +59,7 @@ export const createOrder = async (req, res, next) => {
       // Inventory is reserved only after payment is verified by the server.
     }
 
-    const shippingFee = subtotal > 1000 ? 0 : 50; // Free shipping over 1000 THB
+    const shippingFee = subtotal > 1000 ? 0 : 50; // MMK demo shipping: 50 MMK, free over 1,000 MMK
     const total = subtotal + shippingFee;
 
     const order = await Order.create({
