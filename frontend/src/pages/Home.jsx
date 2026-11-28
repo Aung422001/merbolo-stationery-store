@@ -16,6 +16,7 @@ export const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [productLoadError, setProductLoadError] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -26,9 +27,11 @@ export const Home = () => {
           getCategoriesApi()
         ]);
         setFeaturedProducts(prodRes.data?.products || []);
+        setProductLoadError(false);
         setCategories(catRes.data || []);
       } catch (err) {
         console.error('Failed to load home page data:', err);
+        setProductLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -224,7 +227,7 @@ export const Home = () => {
           </Link>
         </div>
 
-        <ProductGrid products={featuredProducts} isLoading={loading} />
+        {productLoadError && !loading ? <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-slate-800">Featured products could not be loaded. <a className="font-semibold underline" href="/shop">Open shop to retry</a>.</p> : <ProductGrid products={featuredProducts} isLoading={loading} />}
       </section>
     </div>
   );
