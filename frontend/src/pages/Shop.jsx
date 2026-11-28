@@ -72,7 +72,7 @@ export const Shop = () => {
       } catch (err) {
         console.error('Failed to fetch products:', err);
         setProducts([]);
-        setLoadError(err.response?.data?.message || 'Products could not be loaded. Please try again.');
+        setLoadError(err.message || 'Products could not be loaded. Please try again.');
       } finally {
         setLoading(false);
       }
