@@ -25,8 +25,8 @@ export const createPaymentIntent = async (req, res, next) => {
       return res.json({ success: true, data: { clientSecret: existing.client_secret, paymentIntentId: existing.id, amount: order.total } });
     }
     const intent = await stripe().paymentIntents.create({
-      amount: Math.round(order.total * 100),
-      currency: 'thb',
+      amount: Math.round(order.total),
+      currency: 'mmk',
       metadata: { orderId: String(order._id), userId: String(req.user._id) }
     }, { idempotencyKey: `merbolo-order-${order._id}` });
     await Order.updateOne({ _id: order._id, paymentIntentId: '' }, { $set: { paymentIntentId: intent.id } });
@@ -50,8 +50,8 @@ export const handleStripeWebhook = async (req, res) => {
       const order = await Order.findOne({ paymentIntentId: intent.id }).session(session);
       if (!order || order.paymentStatus === 'paid') return;
       if (order.isDemo !== false || order.paymentProvider !== 'stripe') throw new Error('Stripe webhook cannot fulfill a demo order');
-      if (order.paymentStatus !== 'pending' || intent.currency !== 'thb' ||
-          Math.round(order.total * 100) !== intent.amount_received ||
+      if (order.paymentStatus !== 'pending' || intent.currency !== 'mmk' ||
+          Math.round(order.total) !== intent.amount_received ||
           String(order._id) !== intent.metadata?.orderId) {
         throw new Error('Payment does not match pending order');
       }
