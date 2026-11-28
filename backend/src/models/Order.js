@@ -18,7 +18,7 @@ const orderAddressSchema = new mongoose.Schema(
     city: { type: String, required: true },
     province: { type: String, required: true },
     postalCode: { type: String, required: true },
-    country: { type: String, default: 'TH' }
+    country: { type: String, default: 'MM' }
   },
   { _id: false }
 );
