@@ -19,10 +19,10 @@ export const Checkout = () => {
   const [address, setAddress] = useState({
     line1: defaultAddress.line1 || '',
     line2: defaultAddress.line2 || '',
-    city: defaultAddress.city || 'Bangkok',
-    province: defaultAddress.province || 'Bangkok',
-    postalCode: defaultAddress.postalCode || '10110',
-    country: 'TH'
+    city: defaultAddress.city || '',
+    province: defaultAddress.province || '',
+    postalCode: defaultAddress.postalCode || '',
+    country: 'MM'
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -180,15 +180,15 @@ export const Checkout = () => {
             <ul className="text-xs text-slate-600 space-y-1.5 pl-1">
               <li className="flex items-start gap-2">
                 <span className="text-brand-600 font-bold mt-0.5">•</span>
-                Flat shipping fee: <span className="font-semibold text-slate-800 ml-1">THB 50</span>
+                Flat shipping fee: <span className="font-semibold text-slate-800 ml-1">MMK 50</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                Orders over <span className="font-semibold text-slate-800 mx-1">THB 1,000</span> get <span className="font-bold text-emerald-600 ml-1">FREE shipping!</span>
+                Orders over <span className="font-semibold text-slate-800 mx-1">MMK 1,000</span> get <span className="font-bold text-emerald-600 ml-1">FREE shipping!</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-brand-600 font-bold mt-0.5">•</span>
-                Delivery within Thailand only
+                Demo shipping addresses in Myanmar only
               </li>
             </ul>
           </div>
