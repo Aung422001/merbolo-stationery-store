@@ -184,7 +184,7 @@ export const Home = () => {
             </div>
             <div>
               <h4 className="font-bold text-slate-900 text-sm">Secure Checkout</h4>
-              <p className="text-xs text-slate-500 mt-0.5">Protected card payment powered by Stripe.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Demo checkout for portfolio testing. No real payment is charged.</p>
             </div>
           </div>
         </div>
