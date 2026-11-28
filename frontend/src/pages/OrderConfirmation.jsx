@@ -34,6 +34,7 @@ export const OrderConfirmation = () => {
   ];
   const currentStage = stages.findIndex((stage) => stage.key === order?.orderStatus);
   const stopped = order?.orderStatus === 'cancelled' || order?.paymentStatus === 'failed';
+  const confirmed = isPaid && !stopped;
 
   if (loading) {
     return <Spinner size="lg" className="min-h-[60vh]" />;
@@ -54,7 +55,7 @@ export const OrderConfirmation = () => {
     <div className="max-w-3xl mx-auto px-4 py-12 space-y-8">
       <div className="bg-white p-8 sm:p-10 rounded-3xl border border-brand-100 shadow-sm text-center space-y-4">
         <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
-          <CheckCircle2 className="w-10 h-10" />
+          {stopped ? <XCircle className="w-10 h-10" /> : confirmed ? <CheckCircle2 className="w-10 h-10" /> : <Clock3 className="w-10 h-10" />}
         </div>
         <h1 className="text-3xl font-extrabold text-slate-900 font-serif">{isDemo ? (isPaid ? 'Demo Payment Completed' : order.paymentStatus === 'failed' ? 'Demo Payment Declined' : 'Demo Payment Pending') : (isPaid ? 'Payment Confirmed' : 'Payment Pending')}</h1>
         <p className="text-sm text-slate-600 max-w-md mx-auto">
