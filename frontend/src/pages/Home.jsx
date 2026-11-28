@@ -166,7 +166,7 @@ export const Home = () => {
             </div>
             <div>
               <h4 className="font-bold text-slate-900 text-sm">Shipping at Checkout</h4>
-              <p className="text-xs text-slate-500 mt-0.5">Shipping fees and any free-shipping eligibility are calculated at checkout.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Demo shipping: MMK 50; free on orders over MMK 1,000. No real delivery.</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
